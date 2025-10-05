@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>He Hōnore – Matching Game (Ordered)</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#fff3e0; padding:20px; color: black; }
+  h2 { margin-bottom: 20px; }
+  .group { display:flex; gap:40px; justify-content:center; margin-bottom:40px; }
+  .column { width:45%; display:flex; flex-direction:column; gap:12px; }
+  .label { font-size:.9em; opacity:.8; margin:4px 0; }
+  .zone { display:flex; flex-direction:column; gap:10px; }
+  .matched-zone { border:2px solid #bfe8c5; background:#f6fff7; border-radius:8px; padding:8px; min-height:10px; }
+  .pool-zone { }
+  .card { background:#fff; border:2px solid #ccc; padding:10px; border-radius:8px; cursor:pointer; text-align:center; transition:.2s; }
+  .card.matched { font-weight:600; color:black; }
+</style>
+</head>
+<body>
+
+<h2>Matching Activity: He Hōnore (keeps correct order)</h2>
+<p>Click one card from Te Reo and one from English. Correct pairs jump into the green box at the top in the <em>right final order</em>.</p>
+
+<div id="game"></div>
+
+<script>
+const palette = ['#F9CBEA','#EFB5EF','#D8A0F4','#AB8DE7','#7F9CD4','#49B5EB','#3DBCD6','#3DB6B6','#1DE6E6','#5BC892','#8EDE65','#F0F074','#E0C2A3','#FA9A9A','#EBD5C9','#DCD8D8','#BDB6B6','#9F9595','#A5765F','#CC1717','#BB7128','#B6B63D','#60E61D','#1DE682','#1DC4E6','#5BA4C8','#7F49EB','#B665DE','#C674F0','#E78DE7','#E0A3CC'];
+
+const pairs = [
+  { mi: "He hōnore, he korōria ki te Atua", en: "Honour, glory to God" },
+  { mi: "He maungārongo ki te whenua", en: "Peace on earth" },
+  { mi: "He whakaaro pai ki ngā tāngata katoa", en: "Goodwill towards all people" },
+  { mi: "Hanga e te Atua he ngākau hou", en: "God, create in us a new heart" },
+  { mi: "Ki roto ki tēnā, ki tēnā o mātou", en: "Within each one of us" },
+  { mi: "Whakatōngia tō Wairua Tapu", en: "Plant within us your Holy Spirit" },
+  { mi: "Hei āwhina, hei tohutohu i a mātou", en: "To help us, to guide us" },
+  { mi: "Hei ako hoki i ngā mahi mō tēnei rā", en: "To also teach us in the tasks of this day" },
+  { mi: "Āke, āke, āke", en: "Forever and ever" },
+  { mi: "Āmine", en: "Amen" }
+];
+
+// Utility
+function shuffle(arr){ return arr.sort(()=>Math.random()-0.5); }
+
+const gameDiv = document.getElementById("game");
+let selected = [];
+let matchCount = 0;
+
+// Build groups of up to 5 for layout
+const groups = [];
+for (let i=0;i<pairs.length;i+=5){ groups.push(pairs.slice(i,i+5)); }
+
+function createCard(text, type, id, order){
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.textContent = text;
+  div.dataset.type = type;      // 'mi' or 'en'
+  div.dataset.id = id;          // shared id for pair
+  div.dataset.order = order;    // canonical order for sorting matched zone
+  div.addEventListener('click', ()=>handleClick(div));
+  return div;
+}
+
+function sortMatched(zone){
+  const items = Array.from(zone.children);
+  items.sort((a,b)=> (+a.dataset.order) - (+b.dataset.order));
+  items.forEach(el=>zone.appendChild(el));
+}
+
+function getMatchedZone(card){
+  return card.closest('.column').querySelector('.matched-zone');
+}
+
+function handleClick(card){
+  if (card.classList.contains('matched')) return;
+  if (selected.includes(card)) return;
+
+  selected.push(card);
+  card.style.borderColor = 'black';
+
+  if (selected.length===2){
+    const [c1,c2] = selected;
+    const isPair = (c1.dataset.id===c2.dataset.id) && (c1.dataset.type!==c2.dataset.type);
+    if (isPair){
+      const color = palette[matchCount % palette.length];
+      [c1,c2].forEach(c=>{
+        c.classList.add('matched');
+        c.style.backgroundColor = color;
+        c.style.borderColor = color;
+        const zone = getMatchedZone(c);
+        zone.appendChild(c);
+      });
+      // keep canonical order in matched zones
+      sortMatched(getMatchedZone(c1));
+      sortMatched(getMatchedZone(c2));
+      matchCount++;
+    }
+    setTimeout(()=>{
+      selected.forEach(c=>c.style.borderColor='#ccc');
+      selected=[];
+    },250);
+  }
+}
+
+// Render
+groups.forEach(group=>{
+  const groupDiv = document.createElement('div'); groupDiv.className='group';
+
+  // Left column (Māori)
+  const miCol = document.createElement('div'); miCol.className='column';
+  const miLbl1=document.createElement('div'); miLbl1.className='label'; miLbl1.textContent='Matched (in order)';
+  const miMatched=document.createElement('div'); miMatched.className='zone matched-zone';
+  const miLbl2=document.createElement('div'); miLbl2.className='label'; miLbl2.textContent='Māori (tap to match)';
+  const miPool=document.createElement('div'); miPool.className='zone pool-zone';
+
+  // Right column (English)
+  const enCol = document.createElement('div'); enCol.className='column';
+  const enLbl1=document.createElement('div'); enLbl1.className='label'; enLbl1.textContent='Matched (in order)';
+  const enMatched=document.createElement('div'); enMatched.className='zone matched-zone';
+  const enLbl2=document.createElement('div'); enLbl2.className='label'; enLbl2.textContent='English (tap to match)';
+  const enPool=document.createElement('div'); enPool.className='zone pool-zone';
+
+  // Māori pool: alphabetical
+  const sortedMi=[...group].sort((a,b)=>a.mi.localeCompare(b.mi));
+  sortedMi.forEach(p=>{
+    const id = pairs.indexOf(p);
+    miPool.appendChild(createCard(p.mi,'mi',id,id));
+  });
+
+  // English pool: shuffled
+  shuffle([...group]).forEach(p=>{
+    const id = pairs.indexOf(p);
+    enPool.appendChild(createCard(p.en,'en',id,id));
+  });
+
+  miCol.append(miLbl1,miMatched,miLbl2,miPool);
+  enCol.append(enLbl1,enMatched,enLbl2,enPool);
+  groupDiv.append(miCol,enCol);
+  gameDiv.appendChild(groupDiv);
+});
+</script>
+</body>
+</html>

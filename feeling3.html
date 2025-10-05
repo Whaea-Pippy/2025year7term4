@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Te Reo — Match the Sentences</title>
+  <style>
+    :root{
+      --bg: #f7f6ff; /* soft pastel lavender */
+      --card: #fff;
+      --accent: #fbe8e6; /* pastel coral */
+      --muted: #f3fbf6; /* pastel mint */
+      --text: #000000;
+      --radius: 12px;
+      --gap: 18px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background: linear-gradient(135deg,var(--bg), #fffaf0);
+      color:var(--text);
+      padding:32px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .container{
+      max-width:960px;
+      margin:0 auto;
+      background:var(--card);
+      border-radius:16px;
+      padding:24px;
+      box-shadow:0 8px 30px rgba(10,10,10,0.05);
+    }
+    h1{margin:0 0 8px 0;font-size:20px}
+    p.lead{margin:0 0 18px 0;color:#333}
+
+    .section{
+      display:grid;
+      grid-template-columns:1fr 1fr 120px;
+      gap:var(--gap);
+      align-items:start;
+      margin-bottom:22px;
+    }
+
+    .panel{
+      background:var(--muted);
+      padding:14px;
+      border-radius:var(--radius);
+      min-height:220px;
+    }
+    .panel h3{margin:0 0 8px 0;font-size:16px}
+
+    .list{
+      display:flex;flex-direction:column;gap:10px;
+      margin-top:6px;
+    }
+    .item{
+      background:var(--card);
+      padding:10px 12px;
+      border-radius:10px;
+      box-shadow:0 3px 10px rgba(10,10,10,0.04);
+      cursor:pointer;
+      user-select:none;
+      border:2px solid transparent;
+    }
+    .item.selected{outline:3px solid rgba(0,0,0,0.06);transform:translateY(-2px)}
+    .item.matched{opacity:0.5;text-decoration:line-through;cursor:default}
+
+    .controls{
+      display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:flex-start;
+    }
+    button{padding:8px 12px;border-radius:10px;border:0;background:var(--accent);cursor:pointer;font-weight:600}
+    .status{font-size:14px;margin-top:6px}
+
+    .small{font-size:13px;color:#444}
+
+    @media (max-width:780px){
+      .section{grid-template-columns:1fr;}
+      .controls{flex-direction:row}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Match the sentences — Te Reo & English</h1>
+    <p class="lead">Two short matching activities. Tap one Māori sentence and then tap the English sentence you think matches. Each section has 5 sentences.</p>
+
+    <!-- SECTION 1 -->
+    <div class="section" id="section-1">
+      <div class="panel">
+        <h3>Te Reo (Set 1)</h3>
+        <div class="list" id="mori-list-1">
+          <!-- data-id links to correct english id -->
+          <div class="item" data-id="e1">Aroha: Tēnā koe, e Hemi!</div>
+          <div class="item" data-id="e2">Hemi: Kia ora, e Aroha!</div>
+          <div class="item" data-id="e3">Aroha: Kei te pēhea koe?</div>
+          <div class="item" data-id="e4">Hemi: Kei te pai ahau, ā koe?</div>
+          <div class="item" data-id="e5">Aroha: Kei te tino pai ahau.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>English (shuffled)</h3>
+        <div class="list" id="eng-list-1">
+          <div class="item" data-id="e3">How are you?</div>
+          <div class="item" data-id="e1">Hello, Hemi!</div>
+          <div class="item" data-id="e5">I’m really good.</div>
+          <div class="item" data-id="e2">Hi, Aroha!</div>
+          <div class="item" data-id="e4">I’m good, and you?</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button onclick="resetSection(1)">Reset</button>
+        <div class="status" id="status-1">Matches: 0 / 5</div>
+      </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="section" id="section-2">
+      <div class="panel">
+        <h3>Te Reo (Set 2)</h3>
+        <div class="list" id="mori-list-2">
+          <div class="item" data-id="e6">Hemi: I pēhea tō hararei?</div>
+          <div class="item" data-id="e7">Aroha: I pai rawa atu! I haere au ki te moana.</div>
+          <div class="item" data-id="e8">Hemi: Ka rawe! I haere hoki koe me tō whānau?</div>
+          <div class="item" data-id="e9">Aroha: Āe, i haere mātou katoa.</div>
+          <div class="item" data-id="e10">Hemi: Tino pai tērā!</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>English (shuffled)</h3>
+        <div class="list" id="eng-list-2">
+          <div class="item" data-id="e10">That’s great!</div>
+          <div class="item" data-id="e6">How was your holiday?</div>
+          <div class="item" data-id="e8">Cool! Did you go with your family?</div>
+          <div class="item" data-id="e7">It was awesome! I went to the beach.</div>
+          <div class="item" data-id="e9">Yes, we all went.</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button onclick="resetSection(2)">Reset</button>
+        <div class="status" id="status-2">Matches: 0 / 5</div>
+      </div>
+    </div>
+
+    <p class="small">Designed to be simple, pastel, and readable. Works on phones and desktops.</p>
+  </div>
+
+  <script>
+    function makeMatcher(moriListEl, engListEl, statusEl, sectionNum){
+      let selectedM = null;
+      let selectedE = null;
+      let matches = 0;
+      const moriItems = Array.from(moriListEl.querySelectorAll('.item'));
+      const engItems = Array.from(engListEl.querySelectorAll('.item'));
+
+      function updateStatus(){ statusEl.textContent = `Matches: ${matches} / ${moriItems.length}` }
+      updateStatus();
+
+      function clearSelection(){
+        selectedM && selectedM.classList.remove('selected');
+        selectedE && selectedE.classList.remove('selected');
+        selectedM = null; selectedE = null;
+      }
+
+      moriItems.forEach(it => {
+        it.addEventListener('click', ()=>{
+          if(it.classList.contains('matched')) return;
+          if(selectedM === it){ it.classList.remove('selected'); selectedM = null; return }
+          if(selectedM) selectedM.classList.remove('selected');
+          selectedM = it; it.classList.add('selected');
+          tryMatch();
+        })
+      })
+      engItems.forEach(it => {
+        it.addEventListener('click', ()=>{
+          if(it.classList.contains('matched')) return;
+          if(selectedE === it){ it.classList.remove('selected'); selectedE = null; return }
+          if(selectedE) selectedE.classList.remove('selected');
+          selectedE = it; it.classList.add('selected');
+          tryMatch();
+        })
+      })
+
+      function tryMatch(){
+        if(!selectedM || !selectedE) return;
+        const idM = selectedM.getAttribute('data-id');
+        const idE = selectedE.getAttribute('data-id');
+        if(idM === idE){
+          // correct
+          selectedM.classList.add('matched');
+          selectedE.classList.add('matched');
+          selectedM.classList.remove('selected');
+          selectedE.classList.remove('selected');
+          selectedM = null; selectedE = null;
+          matches +=1; updateStatus();
+        } else {
+          // wrong - flash
+          selectedM.classList.add('shake');
+          selectedE.classList.add('shake');
+          setTimeout(()=>{
+            selectedM && selectedM.classList.remove('shake');
+            selectedE && selectedE.classList.remove('shake');
+            selectedM && selectedM.classList.remove('selected');
+            selectedE && selectedE.classList.remove('selected');
+            selectedM = null; selectedE = null;
+          },350);
+        }
+      }
+
+      return { reset: ()=>{
+        matches = 0; updateStatus();
+        moriItems.forEach(i=>{ i.classList.remove('matched','selected') });
+        engItems.forEach(i=>{ i.classList.remove('matched','selected') });
+        // shuffle english order for replay
+        shuffleElements(engListEl);
+      } }
+    }
+
+    function shuffleElements(listEl){
+      const items = Array.from(listEl.children);
+      for(let i = items.length -1; i>0; i--){
+        const j = Math.floor(Math.random()*(i+1));
+        listEl.appendChild(items[j]);
+        items.splice(j,1);
+      }
+    }
+
+    const s1 = makeMatcher(document.getElementById('mori-list-1'), document.getElementById('eng-list-1'), document.getElementById('status-1'), 1);
+    const s2 = makeMatcher(document.getElementById('mori-list-2'), document.getElementById('eng-list-2'), document.getElementById('status-2'), 2);
+
+    function resetSection(n){ if(n===1) s1.reset(); if(n===2) s2.reset(); }
+
+    // initial shuffle for replayability
+    shuffleElements(document.getElementById('eng-list-1'));
+    shuffleElements(document.getElementById('eng-list-2'));
+  </script>
+</body>
+</html>

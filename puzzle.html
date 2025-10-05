@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15 Puzzle</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        #puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(4, 100px);
+            gap: 5px;
+            border: 5px solid #333;
+            background-color: #333;
+        }
+        .tile {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            border: 1px solid #999;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .empty {
+            background-color: #333;
+            cursor: default;
+        }
+        #controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <h1>15 Puzzle</h1>
+    <div id="puzzle-container"></div>
+    <div id="controls">
+        <button id="shuffle-button">Shuffle</button>
+        <button id="solve-button">Solve</button>
+    </div>
+
+    <script>
+        const container = document.getElementById('puzzle-container');
+        const shuffleButton = document.getElementById('shuffle-button');
+        const solveButton = document.getElementById('solve-button');
+
+        const TILE_COUNT = 16;
+        let tiles = [];
+
+        function createTile(number) {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+            if (number === TILE_COUNT) {
+                tile.classList.add('empty');
+            } else {
+                tile.textContent = number;
+            }
+            tile.dataset.id = number;
+            tile.addEventListener('click', () => moveTile(tile));
+            return tile;
+        }
+
+        function getEmptyTile() {
+            return document.querySelector('.empty');
+        }
+
+        function getTilePosition(tile) {
+            const id = parseInt(tile.dataset.id);
+            const index = tiles.findIndex(t => parseInt(t.dataset.id) === id);
+            return {
+                row: Math.floor(index / 4),
+                col: index % 4
+            };
+        }
+
+        function moveTile(tile) {
+            if (tile.classList.contains('empty')) {
+                return;
+            }
+
+            const emptyTile = getEmptyTile();
+            const tilePos = getTilePosition(tile);
+            const emptyPos = getTilePosition(emptyTile);
+
+            const isAdjacent = (
+                (tilePos.row === emptyPos.row && Math.abs(tilePos.col - emptyPos.col) === 1) ||
+                (tilePos.col === emptyPos.col && Math.abs(tilePos.row - emptyPos.row) === 1)
+            );
+
+            if (isAdjacent) {
+                swapTiles(tile, emptyTile);
+                checkWin();
+            }
+        }
+
+        function swapTiles(tile1, tile2) {
+            const tile1Index = tiles.findIndex(t => t === tile1);
+            const tile2Index = tiles.findIndex(t => t === tile2);
+
+            [tiles[tile1Index], tiles[tile2Index]] = [tiles[tile2Index], tiles[tile1Index]];
+            render();
+        }
+
+        function render() {
+            container.innerHTML = '';
+            tiles.forEach(tile => container.appendChild(tile));
+        }
+
+        function shuffle() {
+            for (let i = 0; i < 1000; i++) {
+                const emptyTile = getEmptyTile();
+                const emptyPos = getTilePosition(emptyTile);
+                const neighbors = [];
+
+                if (emptyPos.row > 0) neighbors.push(tiles[(emptyPos.row - 1) * 4 + emptyPos.col]);
+                if (emptyPos.row < 3) neighbors.push(tiles[(emptyPos.row + 1) * 4 + emptyPos.col]);
+                if (emptyPos.col > 0) neighbors.push(tiles[emptyPos.row * 4 + (emptyPos.col - 1)]);
+                if (emptyPos.col < 3) neighbors.push(tiles[emptyPos.row * 4 + (emptyPos.col + 1)]);
+
+                const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+                swapTiles(emptyTile, randomNeighbor);
+            }
+        }
+
+        function solve() {
+            init();
+            render();
+        }
+
+        function checkWin() {
+            for (let i = 0; i < TILE_COUNT; i++) {
+                if (parseInt(tiles[i].dataset.id) !== i + 1) {
+                    return;
+                }
+            }
+            alert('You win!');
+        }
+
+        function init() {
+            tiles = [];
+            for (let i = 1; i <= TILE_COUNT; i++) {
+                tiles.push(createTile(i));
+            }
+        }
+
+        shuffleButton.addEventListener('click', shuffle);
+        solveButton.addEventListener('click', solve);
+
+        init();
+        render();
+    </script>
+</body>
+</html>

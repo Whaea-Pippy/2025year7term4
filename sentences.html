@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pepeha & Karakia – Tap to Order (Tablet Friendly)</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#E6DAF0; padding:20px; text-align:center; }
+  h1{ margin-bottom:10px; }
+  #timer{ font-size:20px; font-weight:bold; margin-bottom:20px; color:#CC1717; }
+  .section{ margin:30px 0; padding:20px; border:3px solid #E0A3CC; border-radius:12px; background:#fffdf9; text-align:left; }
+  .section h2{ margin-top:0; }
+  .question{ background:#fff; padding:15px; margin:15px 0; border-radius:10px; box-shadow:0 4px 6px rgba(0,0,0,0.1); border:3px solid transparent; }
+  .question.correct{ border-color:green; background:#c8f7c5; }
+  .english{ font-size:1.1em; margin-bottom:8px; font-weight:bold; }
+  .row-label{ font-size:.9em; opacity:.8; margin:6px 0 4px; }
+  .cards{ display:flex; flex-wrap:wrap; gap:8px; min-height:50px; border:2px dashed #ccc; padding:10px; border-radius:8px; }
+  .card{ background:#f0f0f0; padding:6px 12px; border-radius:8px; user-select:none; cursor:pointer; }
+  .controls{ margin-top:8px; display:flex; gap:10px; }
+  button{ padding:6px 10px; border-radius:8px; border:1px solid #bbb; background:#f7f7f7; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<h1>Pepeha & Karakia – Tap to Order</h1>
+<div id="timer">Time: 0s</div>
+
+<div id="game-container"></div>
+
+<script>
+// ======== DATA (lines from your karakia) ========
+const sections = [
+  {
+    title: "Kupu Whakataki",
+    sentences: [
+      { en: "Greetings to you all", mi: ["Tēnā","koutou","katoa."] },
+      { en: "Presbyterian is the Church", mi: ["Ko","Perehipitīriana","te","Hāhi."] },
+      { en: "Saint Kentigern is the Patron Saint", mi: ["Ko","Hāto","Kēneti","te","Tangata."] },
+      { en: "Saint Kentigern is the School", mi: ["Ko","Hāto","Kēneti","te","Kura."] },
+      { en: "The faith must be kept", mi: ["Me","ū","ki","te","whakapono."] },
+      { en: "My name is _______", mi: ["Ko","__________","tōku","ingoa."] }
+    ]
+  },
+  {
+    title: "He Hōnore",
+    sentences: [
+      { en:"Honour, glory to God", mi:["He","hōnore,","he","korōria","ki","te","Atua"] },
+      { en:"Peace on earth", mi:["He","maungārongo","ki","te","whenua"] },
+      { en:"Goodwill towards all people", mi:["He","whakaaro","pai","ki","ngā","tāngata","katoa"] },
+      { en:"God, create in us a new heart", mi:["Hanga","e","te","Atua","he","ngākau","hou"] },
+      { en:"Within each one of us", mi:["Ki","roto","ki","tēnā,","ki","tēnā","o","mātou"] },
+      { en:"Plant within us your Holy Spirit", mi:["Whakatōngia","tō","Wairua","Tapu"] },
+      { en:"To help us, to guide us", mi:["Hei","āwhina,","hei","tohutohu","i","a","mātou"] },
+      { en:"To also teach us in the tasks of this day", mi:["Hei","ako","hoki","i","ngā","mahi","mō","tēnei","rā"] },
+      { en:"Forever and ever", mi:["Āke,","āke,","āke"] },
+      { en:"Amen", mi:["Āmine"] }
+    ]
+  }
+];
+
+// ======== BUILD ========
+const game = document.getElementById('game-container');
+
+sections.forEach(section=>{
+  const secDiv = el('div','section');
+  secDiv.appendChild(el('h2',null,section.title));
+
+  section.sentences.forEach(s=>{
+    const qDiv = el('div','question');
+    const answerString = s.mi.join(' ');
+    qDiv.dataset.answer = answerString;
+
+    qDiv.appendChild(el('div','english',s.en));
+
+    // Answer row
+    qDiv.appendChild(el('div','row-label','Answer (tap words below to build):'));
+    const answer = el('div','cards answer');
+    qDiv.appendChild(answer);
+
+    // Bank row
+    qDiv.appendChild(el('div','row-label','Word bank (tap to add/remove):'));
+    const bank = el('div','cards bank');
+    const shuffled = [...s.mi].sort(()=>Math.random()-0.5);
+    shuffled.forEach(w=>{
+      const card = el('div','card',w);
+      card.dataset.token = w;
+      bank.appendChild(card);
+    });
+    qDiv.appendChild(bank);
+
+    // Controls
+    const ctr = el('div','controls');
+    const resetBtn = el('button',null,'Reset line');
+    resetBtn.addEventListener('click', ()=>{
+      [...answer.children].forEach(c=>bank.appendChild(c));
+      check(qDiv);
+    });
+    ctr.appendChild(resetBtn);
+    qDiv.appendChild(ctr);
+
+    // Tap handlers (event delegation)
+    qDiv.addEventListener('click', e=>{
+      const card = e.target.closest('.card');
+      if(!card) return;
+      if(card.parentElement.classList.contains('bank')){
+        answer.appendChild(card);                // move to answer
+      }else{
+        bank.appendChild(card);                  // return to bank
+      }
+      check(qDiv);
+    });
+
+    secDiv.appendChild(qDiv);
+  });
+
+  game.appendChild(secDiv);
+});
+
+// ======== HELPERS ========
+function el(tag, cls, text){
+  const d = document.createElement(tag);
+  if(cls) d.className = cls;
+  if(text!=null) d.textContent = text;
+  return d;
+}
+
+function currentString(qDiv){
+  return [...qDiv.querySelectorAll('.answer .card')].map(c=>c.dataset.token).join(' ');
+}
+
+function check(qDiv){
+  const ok = (currentString(qDiv) === qDiv.dataset.answer);
+  qDiv.classList.toggle('correct', ok);
+}
+
+// ======== TIMER ========
+let s=0;
+setInterval(()=>{ s++; document.getElementById('timer').textContent=`Time: ${s}s`; },1000);
+</script>
+</body>
+</html>

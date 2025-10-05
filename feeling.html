@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matching Game - Feelings</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            width: 800px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        .matching-area {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .column {
+            width: 48%;
+            display: flex;
+            flex-direction: column;
+        }
+        .item {
+            padding: 15px;
+            margin: 5px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .item.selected {
+            background-color: #aed581;
+            border-color: #7cb342;
+        }
+        .item.correct {
+            background-color: #81c784;
+            border-color: #4caf50;
+            cursor: default;
+        }
+        .item.incorrect {
+            background-color: #e57373;
+            border-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Kei te pēhea koe? - How are you?</h1>
+        <div class="matching-area">
+            <div class="column" id="maori-column"></div>
+            <div class="column" id="english-column"></div>
+        </div>
+        <p id="feedback" style="text-align:center; font-size: 1.2em; margin-top: 20px;"></p>
+    </div>
+
+    <script>
+        const pairs = {
+            "Kei te pai ahau.": "I’m good. 😊",
+            "Kei te tino pai ahau.": "I’m really good / great! 😄",
+            "Kei te ngenge ahau.": "I’m tired. 😴",
+            "Kei te harikoa ahau.": "I’m happy / joyful. 😁",
+            "Kei te māuiui ahau.": "I’m sick / unwell. 🤒",
+            "Kei te riri ahau.": "I’m angry. 😡",
+            "Kei te hiamoe ahau.": "I’m sleepy. 💤",
+            "Kei te āmaimai ahau.": "I’m nervous. 😬",
+            "Kei te pōuri ahau.": "I’m sad. 😢",
+            "Kei te koa ahau ki te kite i a koe.": "I’m happy to see you. 💛"
+        };
+
+        const maoriColumn = document.getElementById('maori-column');
+        const englishColumn = document.getElementById('english-column');
+        const feedback = document.getElementById('feedback');
+
+        let maoriPhrases = Object.keys(pairs);
+        let englishPhrases = Object.values(pairs);
+
+        // Shuffle arrays to randomize order
+        shuffleArray(maoriPhrases);
+        shuffleArray(englishPhrases);
+
+        maoriPhrases.forEach(phrase => {
+            const item = createItem(phrase, 'maori');
+            maoriColumn.appendChild(item);
+        });
+
+        englishPhrases.forEach(phrase => {
+            const item = createItem(phrase, 'english');
+            englishColumn.appendChild(item);
+        });
+
+        function createItem(text, type) {
+            const item = document.createElement('div');
+            item.classList.add('item');
+            item.textContent = text;
+            item.dataset.type = type;
+            item.dataset.value = text;
+            item.addEventListener('click', handleItemClick);
+            return item;
+        }
+
+        let selectedMaori = null;
+        let selectedEnglish = null;
+        let correctMatches = 0;
+
+        function handleItemClick(event) {
+            const clickedItem = event.target;
+            if (clickedItem.classList.contains('correct')) {
+                return; // Already matched
+            }
+
+            if (clickedItem.dataset.type === 'maori') {
+                if (selectedMaori) {
+                    selectedMaori.classList.remove('selected');
+                }
+                selectedMaori = clickedItem;
+                selectedMaori.classList.add('selected');
+            } else if (clickedItem.dataset.type === 'english') {
+                if (selectedEnglish) {
+                    selectedEnglish.classList.remove('selected');
+                }
+                selectedEnglish = clickedItem;
+                selectedEnglish.classList.add('selected');
+            }
+
+            if (selectedMaori && selectedEnglish) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const maoriText = selectedMaori.dataset.value;
+            const englishText = selectedEnglish.dataset.value;
+
+            if (pairs[maoriText] === englishText) {
+                // Correct match
+                selectedMaori.classList.add('correct');
+                selectedEnglish.classList.add('correct');
+                selectedMaori.classList.remove('selected');
+                selectedEnglish.classList.remove('selected');
+
+                selectedMaori.removeEventListener('click', handleItemClick);
+                selectedEnglish.removeEventListener('click', handleItemClick);
+
+                selectedMaori = null;
+                selectedEnglish = null;
+                correctMatches++;
+                feedback.textContent = "Ka pai! Correct!";
+                
+                if (correctMatches === maoriPhrases.length) {
+                    feedback.textContent = "Ngā mihi! You\'ve matched them all!";
+                }
+
+            } else {
+                // Incorrect match
+                selectedMaori.classList.add('incorrect');
+                selectedEnglish.classList.add('incorrect');
+                feedback.textContent = "Try again.";
+
+                setTimeout(() => {
+                    selectedMaori.classList.remove('incorrect', 'selected');
+                    selectedEnglish.classList.remove('incorrect', 'selected');
+                    selectedMaori = null;
+                    selectedEnglish = null;
+                }, 1000);
+            }
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+    </script>
+</body>
+</html>
