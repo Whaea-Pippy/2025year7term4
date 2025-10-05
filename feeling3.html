@@ -65,7 +65,7 @@
       border:2px solid transparent;
     }
     .item.selected{outline:3px solid rgba(0,0,0,0.06);transform:translateY(-2px)}
-    .item.matched{opacity:0.5;text-decoration:line-through;cursor:default}
+    .item.matched{background: #e8f5e9; cursor:default;}
 
     .controls{
       display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:flex-start;
@@ -194,6 +194,11 @@
           // correct
           selectedM.classList.add('matched');
           selectedE.classList.add('matched');
+          
+          // Move to top of list
+          selectedM.parentElement.prepend(selectedM);
+          selectedE.parentElement.prepend(selectedE);
+
           selectedM.classList.remove('selected');
           selectedE.classList.remove('selected');
           selectedM = null; selectedE = null;
