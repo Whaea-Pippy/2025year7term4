@@ -1,3 +1,8 @@
-Get started by customizing your environment (defined in the .idx/dev.nix file) with the tools and IDE extensions you'll need for your project!
+# RapuKupu
+Te reo games for second language learners
 
-Learn more at https://developers.google.com/idx/guides/customize-idx-env
+### License
+
+This project is licensed under a **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.**
+
+**Important:** This means the resource is **not to be used for commercial purposes.** It is intended for free educational use only. You cannot sell this work or use it in any product that is sold for profit.
