@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pūrongo Ako – Lesson Log Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 780px;
+            margin: auto;
+//background-color: #c4ebb2
+            padding: 20px;
+        }
+        .log-content {
+            font-family: 'Georgia', serif;
+//font-family: 'Lato', serif;
+            font-size: 20.8px; /* Increased font size for the report */
+            line-height: 1.5;  /* Added for better line spacing */
+        }
+        select option {
+            white-space: normal;
+        }
+        textarea, select, button {
+            font-size: 20.8px;
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 10px solid #f2f5a9;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        button {
+            width: auto;
+            cursor: pointer;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+        #log-date {
+            font-size: 20.8px;
+            padding: 4px 0;
+            font-weight: normal;
+        }
+        #log {
+            border: 5px solid #ccc;
+            padding: 10px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="font-family: Arial; font-size: 20.8px; max-width: 780px;">
+
+    <div>
+        <label for="log-date" style="font-weight: bold;">Rā – Date:</label><br>
+        <div id="log-date" style="font-size: 20.8px; padding: 4px 0;"></div>
+    </div><br>
+
+    <h3>Pūrongo Ako – Lesson Log Generator Year 7</h3>
+
+    <label for="class">My Effort Today:</label><br>
+    <select id="class">
+         <option value="">Select Effort</option>
+        <option value="mīharo">mīharo</option>
+        <option value="tino pai rawa atu">tino pai rawa atu</option>
+        <option value="taraiwa">taraiwa</option>
+        <option value="tupu">tupu</option>
+        <option value="tino pai">tino pai</option>
+        <option value="pai">pai</option>
+    </select><br><br>
+
+    <label for="activity">Kua Mahi ahau i ... – I worked on ...</label><br>
+    <textarea id="activity" rows="4" placeholder="e.g. We listened to Māui and the Sun"></textarea><br><br>
+
+    <label for="kupu">Kupu Hou – New words:</label><br>
+    <textarea id="kupu" rows="2" placeholder="e.g. tōmuri, tere"></textarea><br><br>
+
+    <label for="reflection">Learning reflection:</label><br>
+    <div style="font-size: 18px; margin-bottom: 4px;">
+        <strong>How are you taking ownership of your learning?</strong><br>
+
+Key Kupu: Whakarongo (Listening), Pānui (Reading), Tuhituhi (Writing), and Kōrero (Speaking).</strong><br>
+    </div>
+    <textarea id="reflection" rows="10" placeholder="Describe what went well for you today.
+Did you help someone?
+Did someone help you?
+Did you ask for help when you needed it?
+How did you take charge of your learning?"></textarea><br><br>
+
+    <button onclick="generateLog()">Generate Log</button>
+    <button onclick="copyLog()" style="margin-left: 10px;">📋 Copy Log</button><br><br>
+
+    <label for="log">Pūrongo – Log (copy below):</label><br>
+    <div id="log" class="log-content"></div>
+</div>
+
+<script>
+    // Formatters: Māori (with macrons) and English
+    function formatDateMāori(dateObj) {
+        const months = [
+            "Kohi-tātea", "Hui-tanguru", "Poutū-te-rangi", "Paenga-whāwhā",
+            "Haratua", "Pipiri", "Hōngongoi", "Here-turi-kōkā",
+            "Mahuru", "Whiringa-ā-nuku", "Whiringa-ā-rangi", "Hakihea"
+        ];
+        const day = dateObj.getDate();
+        const month = months[dateObj.getMonth()];
+        const year = dateObj.getFullYear();
+        return `${day} o ${month} ${year}`;
+    }
+
+    function formatDateEnglish(dateObj) {
+        const day = dateObj.getDate();
+        const month = dateObj.toLocaleString('en-NZ', { month: 'long' });
+        const year = dateObj.getFullYear();
+        return `${day} ${month} ${year}`;
+    }
+
+    // Populate the date (display-only) on load
+    document.addEventListener("DOMContentLoaded", () => {
+        const today = new Date();
+        const formattedMāori = formatDateMāori(today);
+        const formattedEnglish = formatDateEnglish(today);
+        document.getElementById("log-date").textContent = `${formattedMāori} (${formattedEnglish})`;
+    });
+
+    // Build the log text
+    function generateLog() {
+        const formattedDate = document.getElementById("log-date").textContent || "";
+        const classVal = document.getElementById("class").value;
+        const activity = document.getElementById("activity").value;
+        const kupu = document.getElementById("kupu").value;
+        const reflection = document.getElementById("reflection").value;
+
+        const log = `Tāku ako i te Rā ${formattedDate}
+        
+Kua <strong>${classVal}</strong> ahau i tāku ako i tēnei rā.
+        
+📚 I Mahia Ai – What You Did:
+${activity}
+
+🗣️ Ngā Kupu Hou – New words:
+${kupu}
+
+✍️ Tāku ako i tēnei rā - My learning today:
+${reflection}`;
+        
+        // Use innerHTML to render the HTML tags
+        document.getElementById("log").innerHTML = log;
+    }
+
+    // Copy log with modern clipboard API fallback
+    function copyLog() {
+        // Use textContent to get only the plain text for copying
+        const logText = document.getElementById("log").textContent || "";
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(logText)
+                .then(() => alert("Log copied to clipboard!"))
+                .catch(() => fallbackCopy());
+        } else {
+            fallbackCopy();
+        }
+
+        function fallbackCopy() {
+            const textarea = document.createElement("textarea");
+            textarea.value = logText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand("copy");
+                alert("Log copied to clipboard!");
+            } catch (e) {
+                alert("Unable to copy automatically — please select and copy the log manually.");
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
