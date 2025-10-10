@@ -1,0 +1,321 @@
+
+<div style="font-family: Arial; font-size: 20.8px; max-width: 780px; margin: auto; padding: 20px;">
+
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 780px;
+        margin: auto;
+        padding: 20px;
+    }
+    .report-content {
+      font-family: 'Georgia', serif;
+      font-size: 16px;
+    }
+    #taskType {
+      font-family: 'Verdana', sans-serif;
+      font-size: 15px;
+    }
+    select option { white-space: normal; }
+    textarea, select, button {
+        font-size: 20.8px;
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 10px solid #f2f5a9;
+        border-radius: 4px;
+        margin-top: 5px;
+    }
+    button {
+        width: auto;
+        cursor: pointer;
+        padding: 10px 20px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    label {
+        font-weight: bold;
+        display: block;
+        margin-top: 15px;
+    }
+  </style>
+
+  <!-- Date (display-only, te reo with macrons first, then English) -->
+  <div>
+    <label for="report-date" style="font-weight: bold;">Rā – Date:</label><br>
+    <div id="report-date" style="font-size: 20.8px; padding: 4px 0;"></div>
+  </div><br>
+
+  <h3>Pūrongo Whakarongo – Listening Report Generator</h3>
+
+  <label for="class">Akomanga – Class:</label><br>
+  <select id="class" onchange="setMarkingOptions()">
+    <option value="">Select Class</option>
+    <option value="7b">7b</option>
+    <option value="7g">7g</option>
+    <option value="9-1">9-1</option>
+    <option value="9-4">9-4</option>
+    <option value="10-3">10-3</option>
+    <option value="10-6">10-6</option>
+  </select><br><br>
+
+  <label for="group">Rōpū – Group:</label><br>
+  <textarea id="group" rows="2"></textarea><br><br>
+
+  <div style="font-size: 18px; margin-bottom: 6px;">
+    <strong>✍️ Tuhia ngā kōrero i rangona ai – Write what you hear</strong><br>
+    Write as much as you can of what you hear – in any language. This is your listening and writing assessment, so the more you write in te reo, the better.
+  </div>
+
+  <!-- Task Type Dropdown -->
+  <div class="task-type-section" style="margin-top: 1em;">
+    <label for="taskType" style="font-weight: bold;">Task Type:</label>
+    <select id="taskType" name="taskType" style="margin-left: 0.5em; font-size: 20.8px;">
+      <option value="Dialogue Task" selected>Dialogue Task</option>
+      <option value="E hia Tokohia">E hia Tokohia</option>
+      <option value="Māui">Māui</option>
+      <option value="Pepeha">Pepeha</option>
+      <option value="Pāngarau">Pāngarau</option>
+      <option value="Tamariki">Tamariki</option>
+      <option value="Tunu Kai">Tunu Kai</option>
+      <option value="Te Wā">Te Wā</option>
+    </select>
+  </div><br>
+
+  <label for="listening">Whakarongo – Listening:</label><br>
+  <textarea id="listening" rows="4" placeholder="Write in english or Te Reo Māori anything you can hear and understand from your peers' conversation. Anything you write is evidence of listening."></textarea><br><br>
+
+  <label for="pronunciation">Tuku Reo – Pronunciation Grade:</label><br>
+  <select id="pronunciation">
+    <option value="">--- Select Grade ---</option>
+  </select><br><br>
+
+  <label for="fluency">Rere o te Kōrero – Fluency Grade:</label><br>
+  <select id="fluency">
+    <option value="">--- Select Grade ---</option>
+  </select><br><br>
+
+  <label for="feedback">Urupare – Feedback:</label><br>
+  <div style="font-size: 18px; margin-bottom: 4px;">
+    <strong>🌿 Kōrero Tīmatanga – Sentence Starters:</strong><br>
+    <em>He pai ki ahau te āhua i ...</em> – I really liked the way you...<br>
+    <em>Ki ōku whakaaro, i whakaritea pai koe.</em> – I can see you prepared well.<br>
+    <em>Ko tētahi mea hei whakapai ake ...</em> – One thing to improve is...<br>
+    <em>I rangona ngā kupu i te tika o te whakahua</em> – Your pronunciation of words was clear.
+  </div>
+  <textarea id="feedback" rows="10"></textarea><br><br>
+
+  <button onclick="generateReport()">Generate Report</button>
+  <button onclick="copyReport()" style="margin-left: 10px;">📋 Copy Report</button><br><br>
+
+  <label for="report">Pūrongo – Report (copy below):</label><br>
+  <textarea id="report" class="report-content" rows="12"></textarea>
+
+</div>
+
+<script>
+  // Formatters: Māori (with macrons) and English
+  function formatDateMāori(dateObj) {
+    const months = [
+      "Kohi-tātea", "Hui-tanguru", "Poutū-te-rangi", "Paenga-whāwhā",
+      "Haratua", "Pipiri", "Hōngongoi", "Here-turi-kōkā",
+      "Mahuru", "Whiringa-ā-nuku", "Whiringa-ā-rangi", "Hakihea"
+    ];
+    const day = dateObj.getDate();
+    const month = months[dateObj.getMonth()];
+    const year = dateObj.getFullYear();
+    return `${day} o ${month} ${year}`;
+  }
+
+  function formatDateEnglish(dateObj) {
+    const day = dateObj.getDate();
+    const month = dateObj.toLocaleString('en-NZ', { month: 'long' });
+    const year = dateObj.getFullYear();
+    return `${day} ${month} ${year}`;
+  }
+
+  // Populate the date (display-only) on load
+  document.addEventListener("DOMContentLoaded", () => {
+    const today = new Date();
+    const formattedMāori = formatDateMāori(today);
+    const formattedEnglish = formatDateEnglish(today);
+    document.getElementById("report-date").textContent = `${formattedMāori} (${formattedEnglish})`;
+
+    // ensure pron/fluency placeholders are present initially
+    const pronunciation = document.getElementById("pronunciation");
+    const fluency = document.getElementById("fluency");
+    pronunciation.innerHTML = '<option value="">--- Select Grade ---</option>';
+    fluency.innerHTML = '<option value="">--- Select Grade ---</option>';
+  });
+
+  // Class-based grading options (restored full logic & bilingual entries)
+  function setMarkingOptions() {
+    const classVal = document.getElementById("class").value;
+    const pronunciation = document.getElementById("pronunciation");
+    const fluency = document.getElementById("fluency");
+
+    pronunciation.innerHTML = '<option value="">--- Select Grade ---</option>';
+    fluency.innerHTML = '<option value="">--- Select Grade ---</option>';
+
+    const gradeSets = {
+      "7": {
+        pron: [
+          ["🔴 Kāore anō kia tutuki", "Me whakapai ake te tuku reo"],
+          ["🔴 Not Yet Achieved", "Pronunciation needs further development"],
+          ["🟠 Kua tutuki", "He māmā te mārama, ahakoa he hapa i ētahi wā"],
+          ["🟠 Achieved", "Basic pronunciation is understandable with some errors"],
+          ["🔵 Paetae", "He pai te whakaputa kupu, ā, ka kitea te kaha ki te whakamahi tika i ngā oro"],
+          ["🔵 Merit", "Mostly clear pronunciation with good effort to use correct sounds"],
+          ["🟢 Hiranga", "He mārama, he māia te tuku reo, ā, he tika ngā oro pū me ngā oro ā-kupu"],
+          ["🟢 Excellence", "Clear and confident pronunciation with accurate vowel and consonant sounds"]
+        ],
+        flu: [
+          ["🔴 Kāore anō kia tutuki", "Me whakapai ake te rere o te kōrero"],
+          ["🔴 Not Yet Achieved", "Fluency needs further development"],
+          ["🟠 Kua tutuki", "He pōturi, he āwangawanga te kōrero, engari ka whai i te aronga tika"],
+          ["🟠 Achieved", "Speech is slow or hesitant but mostly follows a logical flow"],
+          ["🔵 Paetae", "He pai te rere o te kōrero, kāore he maha o ngā whakatikatika"],
+          ["🔵 Merit", "Speech flows well with few pauses or corrections"],
+          ["🟢 Hiranga", "He maeneene, he taiao, he whakapuaki pai te kōrero, me te pai o te tere me te rangi"],
+          ["🟢 Excellence", "Speech is smooth, natural, and expressive with strong rhythm and pace"]
+        ]
+      },
+      "9": {
+        pron: [
+          ["🔴 Kāore anō kia tutuki", "He maha ngā hapa, me whakapai ake"],
+          ["🔴 Not Yet Achieved", "Pronunciation needs further development"],
+          ["🟠 Kua tutuki", "He tika te nuinga o te tuku reo, ahakoa he hapa i ētahi wā"],
+          ["🟠 Achieved", "Pronunciation is mostly correct with occasional errors"],
+          ["🔵 Paetae", "He mārama, he auau te tuku reo, ā, he pai te whakahua i ngā oro Māori"],
+          ["🔵 Merit", "Clear and consistent pronunciation with good articulation of Māori sounds"],
+          ["🟢 Hiranga", "He tino pai te tuku reo, ā, ka whakamahia ngā tohutō me te pēhanga tika"],
+          ["🟢 Excellence", "Excellent pronunciation with confident use of macrons and correct stress"]
+        ],
+        flu: [
+          ["🔴 Kāore anō kia tutuki", "He āwangawanga te rere o te kōrero"],
+          ["🔴 Not Yet Achieved", "Fluency needs further development"],
+          ["🟠 Kua tutuki", "He rere pai te nuinga, ahakoa he āwangawanga i ētahi wā"],
+          ["🟠 Achieved", "Speech is mostly fluent with some hesitation"],
+          ["🔵 Paetae", "He pai te rere, ā, he pai te tere me te whakapuaki"],
+          ["🔵 Merit", "Speech flows well with good pacing and expression"],
+          ["🟢 Hiranga", "He rere taiao, he whakapuaki pai, me te rangi tika"],
+          ["🟢 Excellence", "Fluent, expressive delivery with natural intonation and rhythm"]
+        ]
+      },
+      "10": {
+        pron: [
+          ["🔴 Kāore anō kia tutuki", "He hapa nui tonu, me whakapai ake"],
+          ["🔴 Not Yet Achieved", "Pronunciation needs further development"],
+          ["🟠 Kua tutuki", "He tika te nuinga o te tuku reo, he hapa iti"],
+          ["🟠 Achieved", "Pronunciation is generally correct with minor errors"],
+          ["🔵 Paetae", "He mārama, he māia te tuku reo, ā, ka kitea te aro ki ngā taipitopito"],
+          ["🔵 Merit", "Clear, confident pronunciation with attention to detail"],
+          ["🟢 Hiranga", "He tino tika te tuku reo, ā, he tino pai te whakahaere i ngā oro Māori me te pēhanga"],
+          ["🟢 Excellence", "Highly accurate pronunciation with excellent control of Māori phonetics and emphasis"]
+        ],
+        flu: [
+          ["🔴 Kāore anō kia tutuki", "He āwangawanga, he whakatikatika i te kōrero"],
+          ["🔴 Not Yet Achieved", "Fluency needs further development"],
+          ["🟠 Kua tutuki", "He rere pai, ahakoa he whakatikatika i ētahi wā"],
+          ["🟠 Achieved", "Speech is coherent with some pauses or self-correction"],
+          ["🔵 Paetae", "He rere pai, he whakapuaki pai, me te rangi tika"],
+          ["🔵 Merit", "Fluent and expressive delivery with good rhythm and tone"],
+          ["🟢 Hiranga", "He rere maeneene, he māia, he whakapuaki pai me te mārama"],
+          ["🟢 Excellence", "Seamless, confident, and engaging delivery with excellent flow and clarity"]
+        ]
+      }
+    };
+
+    // derive year group from class string (7*, 9*, 10*)
+    const year =
+      classVal.startsWith("7") ? "7" :
+      classVal.startsWith("9") ? "9" :
+      classVal.startsWith("10") ? "10" : null;
+
+    if (!year) return;
+
+    // Populate pronunciation options (keep bilingual entries)
+    gradeSets[year].pron.forEach(([label, desc]) => {
+      const option = document.createElement("option");
+      option.value = `${label}: ${desc}`;
+      option.text = `${label}: ${desc}`;
+      option.style.color = label.includes("🔴") ? "#b30000" :
+                           label.includes("🟠") ? "#cc6600" :
+                           label.includes("🔵") ? "#0066cc" :
+                           label.includes("🟢") ? "#228B22" : "#000000";
+      pronunciation.appendChild(option);
+    });
+
+    // Populate fluency options
+    gradeSets[year].flu.forEach(([label, desc]) => {
+      const option = document.createElement("option");
+      option.value = `${label}: ${desc}`;
+      option.text = `${label}: ${desc}`;
+      option.style.color = label.includes("🔴") ? "#b30000" :
+                           label.includes("🟠") ? "#cc6600" :
+                           label.includes("🔵") ? "#0066cc" :
+                           label.includes("🟢") ? "#228B22" : "#000000";
+      fluency.appendChild(option);
+    });
+  }
+
+  // Build the report text — includes the single display date (both languages)
+  function generateReport() {
+    const formattedDate = document.getElementById("report-date").textContent || "";
+
+    const classVal = document.getElementById("class").value;
+    const group = document.getElementById("group").value;
+    const taskType = document.getElementById("taskType").value;
+    const listening = document.getElementById("listening").value;
+    const pronunciation = document.getElementById("pronunciation").value;
+    const fluency = document.getElementById("fluency").value;
+    const feedback = document.getElementById("feedback").value;
+
+    const report = `My Assessment - Listening 📅 Rā: ${formattedDate}
+
+Akomanga: ${classVal}  Rōpū: ${group}  Task Type: ${taskType}
+
+🎧 Whakarongo:
+${listening}
+
+✅ Tuku Reo – Pronunciation Grade:
+${pronunciation}
+
+✅ Rere o te Kōrero – Fluency Grade:
+${fluency}
+
+📝 Urupare – Feedback:
+${feedback}`;
+
+    document.getElementById("report").value = report;
+  }
+
+  // Copy report with modern clipboard API fallback
+  function copyReport() {
+    const reportText = document.getElementById("report").value || "";
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(reportText)
+        .then(() => alert("Report copied to clipboard!"))
+        .catch(() => fallbackCopy());
+    } else {
+      fallbackCopy();
+    }
+
+    function fallbackCopy() {
+      const textarea = document.getElementById("report");
+      textarea.select();
+      textarea.setSelectionRange(0, 99999);
+      try {
+        document.execCommand("copy");
+        alert("Report copied to clipboard!");
+      } catch (e) {
+        alert("Unable to copy automatically — please select and copy the report manually.");
+      }
+    }
+  }
+</script>

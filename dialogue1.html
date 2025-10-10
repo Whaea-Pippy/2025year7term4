@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="mi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Haere ki te Whare Kararehe — Dialogue + Vocab Match</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f7fbff; --card:#ffffff; --accent:#6c5ce7;
+      --ok:#2ecc71; --no:#e74c3c; --muted:#7d7d7d;
+      --shadow: 0 6px 18px rgba(20,20,50,0.08);
+    }
+    *{box-sizing:border-box}
+    body{font-family:Nunito, Poppins, system-ui, -apple-system, sans-serif; background:linear-gradient(180deg,#f0f8ff 0%, #fbfbff 100%); margin:0; color:#123; padding:28px}
+    h1{font-size:1.8rem; margin:0 0 8px;}
+    p.lead{margin:0 0 18px; color:var(--muted)}
+
+    /* Dialogue area */
+    .section{max-width:960px; margin:18px auto; background:transparent}
+    .controls{display:flex; gap:8px; margin-bottom:12px}
+    button{background:var(--accent); color:white; border:0; padding:8px 12px; border-radius:12px; cursor:pointer; box-shadow:var(--shadow); font-weight:700}
+    button.ghost{background:transparent; color:var(--accent); border:2px solid rgba(108,92,231,0.12)}
+
+    /* Flip cards, one per row */
+    .cards{display:flex; flex-direction:column; gap:12px}
+    .card-wrap{perspective:1000px}
+    .card{background:var(--card); border-radius:12px; box-shadow:var(--shadow); padding:18px; min-height:72px; display:flex; align-items:center; transition:transform .6s; transform-style:preserve-3d; position:relative}
+    .card.hemi-card { background: #f0f0f0; }
+    .card.flipped{transform:rotateY(180deg)}
+    .card .face{position:absolute; inset:0; backface-visibility:hidden; display:flex; align-items:center}
+    .card .front{padding:12px 16px}
+    .card .back{transform:rotateY(180deg); padding:12px 16px; background:linear-gradient(90deg,#fff #f8faff)}
+    .speaker{font-weight:700; margin-right:10px; color:var(--accent)}
+    .te-reo{font-size:1.2rem}
+    .translation{font-size:1.1rem; color:var(--muted)}
+    .hint{font-size:.85rem; color:var(--muted); margin-left:auto}
+    .flip-hint{font-size:.8rem; color:#666}
+
+    /* Vocab match area from kiwaha1.html */
+    #matching-section {
+        margin-top: 40px;
+    }
+    #matched-pairs-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        min-height: 50px;
+    }
+    .matched-pair {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 500px;
+    }
+     .matched-item {
+        padding: 15px 25px;
+        border-radius: 8px;
+        font-size: 1.3em;
+        color: black;
+        flex: 1;
+    }
+    .matching-game {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 20px;
+    }
+    .column {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .item {
+        padding: 15px 25px;
+        background-color: #add8e6;
+        border: 2px solid #0056b3;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+        font-size: 1.3em;
+        color: black;
+        width: 250px;
+        box-sizing: border-box;
+    }
+    .item:hover {
+        transform: scale(1.05);
+    }
+    .item.selected {
+        background-color: #ffb6c1;
+        border-color: #c71585;
+    }
+    #reset-button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    #feedback {
+        font-size: 1.4em;
+        color: #d9534f;
+        min-height: 25px;
+    }
+
+    .banner{display:none; margin-top:18px; padding:14px; border-radius:12px; background:linear-gradient(90deg,#d4fff3,#e8fff5); color:#0a7; font-weight:800; box-shadow:var(--shadow)}
+    .banner.show{display:block}
+
+    footer{max-width:960px; margin:28px auto; text-align:center; color:var(--muted); font-size:.85rem}
+
+  </style>
+</head>
+<body>
+  <div class="section">
+    <h1>Haere ki te Whare Kararehe — Dialogue (flip each card)</h1>
+    <p class="lead">Tap a card to flip and see the English translation on the back. One card per row — simple sentences for Year 5.</p>
+
+    <div class="controls">
+      <button id="flipAll">Flip All</button>
+      <button id="resetCards" class="ghost">Reset Cards</button>
+    </div>
+
+    <div class="cards" id="cards">
+      <!-- Cards from original dialogue1.html -->
+      <div class="card-wrap"><div class="card hemi-card" data-index="1" tabindex="0"><div class="face front"><span class="speaker">Hemi:</span><span class="te-reo">Kia ora, e Aroha! Kei te haere koe ki te whare kararehe?</span><span class="hint flip-hint">(tap)</span></div><div class="face back"><span class="translation">Hi, Aroha! Are you going to the zoo?</span></div></div></div>
+      <div class="card-wrap"><div class="card" data-index="2"><div class="face front"><span class="speaker">Aroha:</span><span class="te-reo">Āe, kei te haere au!</span></div><div class="face back"><span class="translation">Yes, I’m going!</span></div></div></div>
+      <div class="card-wrap"><div class="card hemi-card" data-index="3"><div class="face front"><span class="speaker">Hemi:</span><span class="te-reo">Ka haere tāua āpōpō?</span></div><div class="face back"><span class="translation">Shall we go tomorrow?</span></div></div></div>
+      <div class="card-wrap"><div class="card" data-index="4"><div class="face front"><span class="speaker">Aroha:</span><span class="te-reo">Āe, ka pai!</span></div><div class="face back"><span class="translation">Yes, that’s good!</span></div></div></div>
+      <div class="card-wrap"><div class="card hemi-card" data-index="5"><div class="face front"><span class="speaker">Hemi:</span><span class="te-reo">Kei te hiahia au ki te kite i te raiona.</span></div><div class="face back"><span class="translation">I want to see the lion.</span></div></div></div>
+      <div class="card-wrap"><div class="card" data-index="6"><div class="face front"><span class="speaker">Aroha:</span><span class="te-reo">Kei te hiahia au ki ngā makimaki.</span></div><div class="face back"><span class="translation">I like the monkeys.</span></div></div></div>
+      <div class="card-wrap"><div class="card hemi-card" data-index="7"><div class="face front"><span class="speaker">Hemi:</span><span class="te-reo">He ngahau ngā makimaki!</span></div><div class="face back"><span class="translation">The monkeys are funny!</span></div></div></div>
+      <div class="card-wrap"><div class="card" data-index="8"><div class="face front"><span class="speaker">Aroha:</span><span class="te-reo">Āe, he tino ngahau.</span></div><div class="face back"><span class="translation">Yes, they are really funny.</span></div></div></div>
+      <div class="card-wrap"><div class="card hemi-card" data-index="9"><div class="face front"><span class="speaker">Hemi:</span><span class="te-reo">Ka kawe au i te wai.</span></div><div class="face back"><span class="translation">I’ll bring the water.</span></div></div></div>
+      <div class="card-wrap"><div class="card" data-index="10"><div class="face front"><span class="speaker">Aroha:</span><span class="te-reo">Ka kawe au i ngā kai.</span></div><div class="face back"><span class="translation">I’ll bring the food.</span></div></div></div>
+      <div class="card-wrap"><div class="card hemi-card" data-index="11"><div class="face front"><span class="speaker">Hemi:</span><span class="te-reo">Ka pai!</span></div><div class="face back"><span class="translation">Good!</span></div></div></div>
+      <div class="card-wrap"><div class="card" data-index="12"><div class="face front"><span class="speaker">Aroha:</span><span class="te-reo">Kei te hiahia hoki au ki te tango whakaahua.</span></div><div class="face back"><span class="translation">I also want to take photos.</span></div></div></div>
+      <div class="card-wrap"><div class="card hemi-card" data-index="13"><div class="face front"><span class="speaker">Hemi:</span><span class="te-reo">Me tango whakaahua tāua ki te arewhana.</span></div><div class="face back"><span class="translation">Let’s take a photo with the elephant.</span></div></div></div>
+      <div class="card-wrap"><div class="card" data-index="14"><div class="face front"><span class="speaker">Aroha:</span><span class="te-reo">Āe, he nui te arewhana.</span></div><div class="face back"><span class="translation">Yes, the elephant is big.</span></div></div></div>
+      <div class="card-wrap"><div class="card hemi-card" data-index="15"><div class="face front"><span class="speaker">Hemi:</span><span class="te-reo">He ātaahua hoki.</span></div><div class="face back"><span class="translation">And beautiful too.</span></div></div></div>
+      <div class="card-wrap"><div class="card" data-index="16"><div class="face front"><span class="speaker">Aroha:</span><span class="te-reo">Ka hoki tāua i te toru karaka.</span></div><div class="face back"><span class="translation">We’ll go home at three o’clock.</span></div></div></div>
+      <div class="card-wrap"><div class="card hemi-card" data-index="17"><div class="face front"><span class="speaker">Hemi:</span><span class="te-reo">Āe, kia pai te rā.</span></div><div class="face back"><span class="translation">Yes, have a good day.</span></div></div></div>
+      <div class="card-wrap"><div class="card" data-index="18"><div class="face front"><span class="speaker">Aroha:</span><span class="te-reo">Ka rawe te whare kararehe!</span></div><div class="face back"><span class="translation">The zoo will be awesome!</span></div></div></div>
+      <div class="card-wrap"><div class="card hemi-card" data-index="19"><div class="face front"><span class="speaker">Hemi:</span><span class="te-reo">Āe, ka kite tātou i ngā kararehe katoa.</span></div><div class="face back"><span class="translation">Yes, we’ll see all the animals.</span></div></div></div>
+      <div class="card-wrap"><div class="card" data-index="20"><div class="face front"><span class="speaker">Aroha:</span><span class="te-reo">Tino pai!</span></div><div class="face back"><span class="translation">So good!</span></div></div></div>
+    </div>
+    <div class="banner" id="dialogueBanner">Kia pai! Nāu i tino whakamātau — Well done!</div>
+  </div>
+
+  <!-- Vocab matching activity -->
+  <div id="matching-section" class="section">
+        <h2>Matching Game</h2>
+        <div id="matched-pairs-container"></div>
+        <div class="matching-game">
+            <div class="column" id="maori-column"></div>
+            <div class="column" id="english-column"></div>
+        </div>
+        <button id="reset-button">Reset</button>
+        <p id="feedback"></p>
+    </div>
+
+  <footer>Designed for Year 5 te reo practice — tap or click each card to flip. Reset buttons clear activity state.</footer>
+
+  <script>
+    // Card flip behaviour
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(c => {
+      c.addEventListener('click', ()=> c.classList.toggle('flipped'));
+      c.addEventListener('keydown', (e)=>{ if(e.key==='Enter') c.classList.toggle('flipped') });
+    });
+
+    document.getElementById('flipAll').addEventListener('click', ()=>{
+      const allFlipped = Array.from(cards).every(c=>c.classList.contains('flipped'));
+      cards.forEach(c=> c.classList.toggle('flipped', !allFlipped));
+      document.getElementById('dialogueBanner').classList.toggle('show', !allFlipped);
+      setTimeout(()=>document.getElementById('dialogueBanner').classList.remove('show'), 1400);
+    });
+    document.getElementById('resetCards').addEventListener('click', ()=>{
+      cards.forEach(c=> c.classList.remove('flipped'));
+    });
+
+    // Vocab matching data
+    const phrases = [
+      {maori:'whare kararehe', english:'zoo'},
+      {maori:'raiona', english:'lion'},
+      {maori:'makimaki', english:'monkeys'},
+      {maori:'arewhana', english:'elephant'},
+      {maori:'wai', english:'water'},
+      {maori:'kai', english:'food'},
+      {maori:'whakaahua', english:'photo'},
+      {maori:'haere', english:'go'},
+      {maori:'toru karaka', english:'three o\'clock'},
+      {maori:'tino pai', english:'very good'}
+    ];
+
+    const matchColors = ['#FFFFE0', '#ADD8E6', '#FFB6C1', '#98FB98', '#E6E6FA'];
+    const maoriColumn = document.getElementById('maori-column');
+    const englishColumn = document.getElementById('english-column');
+    const resetButton = document.getElementById('reset-button');
+    const feedback = document.getElementById('feedback');
+    const matchedPairsContainer = document.getElementById('matched-pairs-container');
+
+    let selectedMaori = null;
+    let selectedEnglish = null;
+    let matchedCount = 0;
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function init() {
+        maoriColumn.innerHTML = '';
+        englishColumn.innerHTML = '';
+        matchedPairsContainer.innerHTML = '';
+        feedback.textContent = '';
+        selectedMaori = null;
+        selectedEnglish = null;
+        matchedCount = 0;
+
+        const englishPhrases = shuffle([...phrases]);
+        phrases.forEach((phrase, index) => {
+            const maoriItem = createMatchingItem(phrase.maori, 'maori', phrase.maori);
+            maoriColumn.appendChild(maoriItem);
+
+            const englishItem = createMatchingItem(englishPhrases[index].english, 'english', englishPhrases[index].maori);
+            englishColumn.appendChild(englishItem);
+        });
+    }
+
+    function createMatchingItem(text, type, pairKey) {
+        const item = document.createElement('div');
+        item.classList.add('item');
+        item.textContent = text;
+        item.dataset.type = type;
+        item.dataset.pairKey = pairKey;
+        item.addEventListener('click', handleItemClick);
+        return item;
+    }
+
+    function handleItemClick(event) {
+        const clickedItem = event.target;
+        if (clickedItem.classList.contains('correct')) return;
+
+        const type = clickedItem.dataset.type;
+
+        if (type === 'maori') {
+            if (selectedMaori) selectedMaori.classList.remove('selected');
+            selectedMaori = clickedItem;
+            selectedMaori.classList.add('selected');
+        } else {
+            if (selectedEnglish) selectedEnglish.classList.remove('selected');
+            selectedEnglish = clickedItem;
+            selectedEnglish.classList.add('selected');
+        }
+
+        if (selectedMaori && selectedEnglish) {
+            checkMatch();
+        }
+    }
+
+    function checkMatch() {
+        if (selectedMaori.dataset.pairKey === selectedEnglish.dataset.pairKey) {
+            const color = matchColors[matchedCount % matchColors.length];
+            
+            const pairDiv = document.createElement('div');
+            pairDiv.classList.add('matched-pair');
+            pairDiv.style.backgroundColor = color;
+            
+            selectedMaori.removeEventListener('click', handleItemClick);
+            selectedEnglish.removeEventListener('click', handleItemClick);
+
+            selectedMaori.classList.remove('item', 'selected');
+            selectedEnglish.classList.remove('item', 'selected');
+            selectedMaori.classList.add('matched-item');
+            selectedEnglish.classList.add('matched-item');
+
+            pairDiv.appendChild(selectedMaori);
+            pairDiv.appendChild(selectedEnglish);
+            matchedPairsContainer.appendChild(pairDiv);
+
+            feedback.textContent = "Ka pai! Correct!";
+            matchedCount++;
+            
+            if (matchedCount === phrases.length) {
+                feedback.textContent = "Ka rawe! You've matched them all!";
+            }
+
+        } else {
+            feedback.textContent = "Try again!";
+            if (selectedMaori) selectedMaori.classList.remove('selected');
+            if (selectedEnglish) selectedEnglish.classList.remove('selected');
+        }
+        selectedMaori = null;
+        selectedEnglish = null;
+    }
+
+    resetButton.addEventListener('click', init);
+
+    init();
+  </script>
+</body>
+</html>
