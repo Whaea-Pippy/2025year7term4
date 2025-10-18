@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="mi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ko te karakia, ko ______. Me inoi tātou.</title>
+  <style>
+    :root{--bg:#fbfbff;--card:#fff;--muted:#6b7280;--accent:#7c3aed}
+    *{box-sizing:border-box;font-family:Nunito,Inter,system-ui,Segoe UI,Roboto,sans-serif}
+    body{margin:0;background:linear-gradient(180deg,#f7f9ff 0%,var(--bg) 100%);color:#111;padding:24px}
+    .wrap{max-width:980px;margin:0 auto}
+    h1{font-size:1.4rem;margin:6px 0 12px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+    .card{background:var(--card);border-radius:14px;box-shadow:0 6px 20px rgba(18,24,50,0.06);padding:18px}
+    .section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .btn{background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:10px;cursor:pointer}
+    .mutebtn{background:#eef2ff;color:#3730a3;border:none;padding:6px 10px;border-radius:8px;cursor:pointer}
+
+    /* Flashcards */
+    .flashcard-grid{display:flex;gap:12px;flex-wrap:wrap}
+    .flip-card{width:140px;height:100px;perspective:1000px}
+    .flip-inner{position:relative;width:100%;height:100%;text-align:center;transition:transform .6s;transform-style:preserve-3d;border-radius:10px}
+    .flip-inner.flipped{transform:rotateY(180deg)}
+    .flip-front,.flip-back{position:absolute;width:100%;height:100%;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:8px}
+    .flip-front{background:linear-gradient(180deg,#fff,#f3f5ff);font-weight:700}
+    .flip-back{background:linear-gradient(180deg,#fff,#fff);transform:rotateY(180deg);color:var(--muted)}
+
+    /* Matching */
+    .match-cols{display:flex;gap:12px;flex-wrap:wrap}
+    .match-list{flex:1;min-width:200px}
+    .match-item{background:#fff;border-radius:10px;padding:10px;margin:8px 6px;cursor:pointer;box-shadow:0 3px 8px rgba(16,24,40,0.04)}
+    .match-item.disabled{opacity:0.45;cursor:default}
+
+    /* Ordering */
+    .word-bank{display:flex;flex-wrap:wrap;gap:8px}
+    .word-btn{background:#fff;padding:8px 12px;border-radius:999px;border:1px solid #e6e9f2;cursor:pointer}
+    .word-btn.used{opacity:0.5}
+    .sentence-area{min-height:56px;border-radius:10px;padding:10px;border:1px dashed #dbe2ff;background:#fbfdff}
+    .feedback{margin-top:10px;font-weight:700}
+
+    .small{font-size:0.85rem;color:var(--muted)}
+    .success{color:#065f46}
+    .error{color:#b91c1c}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Mā wai te karakia?<span style="color:var(--accent)"> Māku te karakia.</span></h1>
+    <h2>Ko te karakia timatanga, ko He Hōnore. <span style="color:#0ea5a4"> Me inoi tātou.</span></h2>
+    <h2>Ko te karakia whakamutunga, ko Kia Tau. <span style="color:#0ea5a4"> Me inoi tātou.</span></h2>
+    <br>
+    <p class="lead"></p>
+
+    <div class="grid">
+      <!-- Flashcards -->
+      <div class="card">
+        <div class="section-title">
+          <strong>Flashcards — tap to flip</strong>
+          <div><button class="mutebtn" id="shuffleCards">Shuffle</button></div>
+        </div>
+        <div class="flashcard-grid" id="flashcards"></div>
+      </div>
+
+      <!-- Matching -->
+      <div class="card">
+        <div class="section-title">
+          <strong>Matching — match Māori to English</strong>
+          <div><button class="mutebtn" id="resetMatch">Reset</button></div>
+        </div>
+        <div class="match-cols">
+          <div class="match-list" id="maoriList"></div>
+          <div class="match-list" id="engList"></div>
+        </div>
+        <div class="small">Score: <span id="matchScore">0</span>/<span id="matchTotal">0</span></div>
+      </div>
+
+      <!-- Ordering -->
+      <div class="card" style="grid-column:1/-1">
+        <div class="section-title">
+          <strong>Word-order — click words in order to build the sentence</strong>
+          <div>
+            <button class="mutebtn" id="toggleSentence">Use: Opening</button>
+            <button class="btn" id="checkOrder">Check</button>
+            <button class="mutebtn" id="resetOrder">Reset</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+          <div style="flex:1;min-width:280px">
+            <div class="small">Word bank</div>
+            <div class="word-bank" id="wordBank"></div>
+          </div>
+          <div style="flex:2;min-width:280px">
+            <div class="small">Your sentence</div>
+            <div class="sentence-area" id="sentenceArea"></div>
+            <div class="feedback" id="orderFeedback"></div>
+          </div>
+        </div>
+        <div style="margin-top:12px" class="small">Target sentences:
+          <ul>
+            <li><em>Ko te karakia timatanga, ko He Hōnore. Me inoi tātou.</em></li>
+            <li><em>Ko te karakia whakamutunga, ko Kia Tau. Me inoi tātou.</em></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <footer style="margin-top:16px;text-align:center" class="small">Words used: <span id="wordListText"></span></footer>
+  </div>
+
+  <script>
+    // Vocabulary — only words from the two phrases
+    const vocab = [
+      {m: 'Ko', e: 'is / indicates what something is'},
+      {m: 'te', e: 'the'},
+      {m: 'karakia', e: 'prayer / blessing'},
+      {m: 'timatanga', e: 'beginning / opening'},
+      {m: 'whakamutunga', e: 'ending / conclusion'},
+      {m: 'He', e: 'a / (article before names) '},
+      {m: 'Hōnore', e: 'Hōnore ("Honour")'},
+      {m: 'Kia', e: 'let / may'},
+      {m: 'Tau', e: 'settle / be upon'},
+      {m: 'Me', e: "let's / should"},
+      {m: 'inoi', e: 'to pray'},
+      {m: 'tātou', e: 'us / we (inclusive)'}
+    ];
+
+    // ---------- FLASHCARDS ----------
+    const flashEl = document.getElementById('flashcards');
+    function makeFlashcards(){
+      flashEl.innerHTML = '';
+      const shuffled = [...vocab].sort(()=>Math.random()-0.5);
+      shuffled.forEach(item=>{
+        const card = document.createElement('div');card.className='flip-card';
+        const inner = document.createElement('div');inner.className='flip-inner';
+        const front = document.createElement('div');front.className='flip-front';front.innerHTML = `<div>${item.m}</div>`;
+        const back = document.createElement('div');back.className='flip-back';back.innerHTML = `<div><strong>${item.e}</strong></div>`;
+        inner.appendChild(front);inner.appendChild(back);card.appendChild(inner);
+        card.addEventListener('click',()=>inner.classList.toggle('flipped'));
+        flashEl.appendChild(card);
+      });
+    }
+    makeFlashcards();
+    document.getElementById('shuffleCards').addEventListener('click',makeFlashcards);
+
+    // ---------- MATCHING ----------
+    const maoriListEl = document.getElementById('maoriList');
+    const engListEl = document.getElementById('engList');
+    let matchScore = 0; let matchTotal = vocab.length;
+    document.getElementById('matchTotal').textContent = matchTotal;
+
+    function makeMatching(){
+      matchScore = 0; document.getElementById('matchScore').textContent = matchScore;
+      maoriListEl.innerHTML=''; engListEl.innerHTML='';
+      // left: maori in order
+      const left = [...vocab].sort((a,b)=>a.m.localeCompare(b.m));
+      const right = [...vocab].sort(()=>Math.random()-0.5);
+      right.forEach((r,idx)=>{
+        const item = document.createElement('div');item.className='match-item';item.textContent = r.e;item.dataset.key = r.m;item.dataset.used = 'false';
+        engListEl.appendChild(item);
+      });
+      left.forEach(l=>{
+        const mi = document.createElement('div');mi.className='match-item';mi.textContent = l.m;mi.dataset.key = l.m;mi.addEventListener('click',()=>selectMaori(mi));
+        maoriListEl.appendChild(mi);
+      });
+    }
+
+    let selectedMaori = null;
+    function selectMaori(el){
+      if(el.classList.contains('disabled')) return;
+      // highlight selection
+      [...maoriListEl.querySelectorAll('.match-item')].forEach(i=>i.style.boxShadow='none');
+      el.style.boxShadow='0 4px 14px rgba(124,58,237,0.18)';
+      selectedMaori = el.dataset.key;
+    }
+
+    engListEl.addEventListener('click', (ev)=>{
+      const target = ev.target.closest('.match-item');
+      if(!target || target.dataset.used==='true') return;
+      if(!selectedMaori) return;
+      const engKey = target.dataset.key;
+      if(engKey === selectedMaori){
+        // correct
+        target.dataset.used='true'; target.classList.add('disabled');
+        const leftItems = [...maoriListEl.querySelectorAll('.match-item')];
+        const leftChosen = leftItems.find(i=>i.dataset.key===selectedMaori);
+        if(leftChosen) leftChosen.classList.add('disabled');
+        matchScore++; document.getElementById('matchScore').textContent = matchScore;
+        selectedMaori = null; [...maoriListEl.querySelectorAll('.match-item')].forEach(i=>i.style.boxShadow='none');
+      } else {
+        // wrong -> blink
+        target.style.transform='scale(0.98)'; setTimeout(()=>target.style.transform='scale(1)',200);
+        selectedMaori = null; [...maoriListEl.querySelectorAll('.match-item')].forEach(i=>i.style.boxShadow='none');
+      }
+    });
+
+    document.getElementById('resetMatch').addEventListener('click',makeMatching);
+    makeMatching();
+
+    // ---------- ORDERING ----------
+    const orderToggle = document.getElementById('toggleSentence');
+    const wordBankEl = document.getElementById('wordBank');
+    const sentenceArea = document.getElementById('sentenceArea');
+    const orderFeedback = document.getElementById('orderFeedback');
+    let currentTarget = 'opening'; // 'opening' or 'closing'
+
+    const targets = {
+      opening: ['Ko','te','karakia','timatanga,','ko','He','Hōnore.','Me','inoi','tātou.'],
+      closing: ['Ko','te','karakia','whakamutunga,','ko','Kia','Tau.','Me','inoi','tātou.']
+    };
+
+    function renderWordBank(){
+      wordBankEl.innerHTML='';
+      // use unique words (strip punctuation for bank but display original)
+      const bank = [...new Set(Object.values(targets).flat())].sort(()=>Math.random()-0.5);
+      bank.forEach(w=>{
+        const b = document.createElement('button');b.className='word-btn';b.textContent = w;b.dataset.word = w; b.addEventListener('click',()=>pickWord(b));
+        wordBankEl.appendChild(b);
+      });
+      document.getElementById('wordListText').textContent = bank.join(', ');
+    }
+    renderWordBank();
+
+    let built = [];
+    function pickWord(btn){
+      if(btn.classList.contains('used')) return;
+      btn.classList.add('used');
+      built.push(btn.dataset.word);
+      refreshSentence();
+    }
+
+    function refreshSentence(){
+      sentenceArea.innerHTML = '';
+      built.forEach((w,idx)=>{
+        const span = document.createElement('span');span.style.marginRight='8px';span.style.padding='6px 8px';span.style.borderRadius='8px';span.style.background='#fff';span.textContent = w; span.style.cursor='pointer';
+        span.addEventListener('click',()=>removeWord(idx));
+        sentenceArea.appendChild(span);
+      });
+    }
+
+    function removeWord(idx){
+      // un-use corresponding bank button
+      const word = built[idx]; built.splice(idx,1);
+      const btn = [...wordBankEl.querySelectorAll('.word-btn')].find(b=>b.dataset.word===word && b.classList.contains('used'));
+      if(btn) btn.classList.remove('used');
+      refreshSentence();
+    }
+
+    orderToggle.addEventListener('click',()=>{
+      currentTarget = currentTarget==='opening' ? 'closing' : 'opening';
+      orderToggle.textContent = 'Use: ' + (currentTarget==='opening' ? 'Opening' : 'Closing');
+      resetOrder();
+    });
+
+    document.getElementById('resetOrder').addEventListener('click',resetOrder);
+    function resetOrder(){
+      built = []; [...wordBankEl.querySelectorAll('.word-btn')].forEach(b=>b.classList.remove('used'));
+      refreshSentence(); orderFeedback.textContent='';
+    }
+
+    document.getElementById('checkOrder').addEventListener('click', ()=>{
+      const targetSeq = targets[currentTarget].map(s=>s.replace(/,$|\.$/g,'').toLowerCase());
+      const builtSeq = built.map(s=>s.replace(/,$|\.$/g,'').toLowerCase());
+      if(builtSeq.length !== targetSeq.length){ orderFeedback.textContent = '✖ Sentence is incomplete.'; orderFeedback.className='feedback error'; return; }
+      const ok = builtSeq.every((w,i)=>w===targetSeq[i]);
+      if(ok){ orderFeedback.textContent = '🎉 Tino pai! That is correct.'; orderFeedback.className='feedback success'; }
+      else { orderFeedback.textContent = '✖ Aroha mai — not quite. Check the word order.'; orderFeedback.className='feedback error'; }
+    });
+
+    // initialise
+    resetOrder();
+
+  </script>
+</body>
+</html>

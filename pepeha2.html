@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pepeha - Set 2</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #0056b3;
+        }
+        .flashcard-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            perspective: 1000px; /* Apply perspective to the container */
+        }
+        .flashcard {
+            width: 220px;
+            height: 140px;
+            cursor: pointer;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 1.2em;
+            color: black;
+        }
+        .flashcard-front {
+            background-color: #ffdead;
+        }
+        .flashcard-back {
+            background-color: #87cefa;
+            transform: rotateY(180deg);
+        }
+        #matching-section {
+            margin-top: 40px;
+        }
+        #matched-pairs-container {
+            display: flex;
+            flex-direction: column; /* Stack matched pairs vertically */
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            min-height: 50px;
+        }
+        .matched-pair {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px; /* Max width for a matched pair row */
+        }
+         .matched-item {
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            color: black;
+            flex: 1;
+        }
+        .matching-game {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .item {
+            padding: 15px 25px;
+            background-color: #add8e6;
+            border: 2px solid #0056b3;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-size: 1.1em;
+            color: black;
+            width: 250px; /* Consistent width for matching cards */
+            box-sizing: border-box;
+        }
+        .item:hover {
+            transform: scale(1.05);
+        }
+        .item.selected {
+            background-color: #ffb6c1;
+            border-color: #c71585;
+        }
+        #reset-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        #feedback {
+            font-size: 1.2em;
+            color: #d9534f;
+            min-height: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Pepeha - Set 2</h1>
+
+    <h2>Flashcards</h2>
+    <div id="flashcard-container" class="flashcard-container"></div>
+
+    <div id="matching-section">
+        <h2>Matching Game</h2>
+        <div id="matched-pairs-container"></div>
+        <div class="matching-game">
+            <div class="column" id="maori-column"></div>
+            <div class="column" id="english-column"></div>
+        </div>
+        <button id="reset-button">Reset</button>
+        <p id="feedback"></p>
+    </div>
+
+    <script>
+        const phrases = [
+            { maori: "Perehipitīriana", english: "Presbyterian" },
+            { maori: "Whakapono", english: "Faith, belief" },
+            { maori: "Tangata", english: "Person, man" },
+            { maori: "Kēneti", english: "Kentigern" },
+            { maori: "Ingoa", english: "Name" }
+        ];
+
+        const matchColors = ['#FFFFE0', '#ADD8E6', '#FFB6C1', '#98FB98', '#E6E6FA'];
+
+        const flashcardContainer = document.getElementById('flashcard-container');
+        const maoriColumn = document.getElementById('maori-column');
+        const englishColumn = document.getElementById('english-column');
+        const resetButton = document.getElementById('reset-button');
+        const feedback = document.getElementById('feedback');
+        const matchedPairsContainer = document.getElementById('matched-pairs-container');
+
+        let selectedMaori = null;
+        let selectedEnglish = null;
+        let matchedCount = 0;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function init() {
+            flashcardContainer.innerHTML = '';
+            maoriColumn.innerHTML = '';
+            englishColumn.innerHTML = '';
+            matchedPairsContainer.innerHTML = '';
+            feedback.textContent = '';
+            selectedMaori = null;
+            selectedEnglish = null;
+            matchedCount = 0;
+
+            phrases.forEach(phrase => {
+                const card = document.createElement('div');
+                card.classList.add('flashcard');
+                card.innerHTML = `
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front"><h3>${phrase.maori}</h3></div>
+                        <div class="flashcard-back"><h3>${phrase.english}</h3></div>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    card.classList.toggle('flipped');
+                });
+                flashcardContainer.appendChild(card);
+            });
+
+            const englishPhrases = shuffle([...phrases]);
+            phrases.forEach((phrase, index) => {
+                const maoriItem = createMatchingItem(phrase.maori, 'maori', phrase.maori);
+                maoriColumn.appendChild(maoriItem);
+
+                const englishItem = createMatchingItem(englishPhrases[index].english, 'english', englishPhrases[index].maori);
+                englishColumn.appendChild(englishItem);
+            });
+        }
+
+        function createMatchingItem(text, type, pairKey) {
+            const item = document.createElement('div');
+            item.classList.add('item');
+            item.textContent = text;
+            item.dataset.type = type;
+            item.dataset.pairKey = pairKey;
+            item.addEventListener('click', handleItemClick);
+            return item;
+        }
+
+        function handleItemClick(event) {
+            const clickedItem = event.target;
+            if (clickedItem.classList.contains('correct')) return;
+
+            const type = clickedItem.dataset.type;
+
+            if (type === 'maori') {
+                if (selectedMaori) selectedMaori.classList.remove('selected');
+                selectedMaori = clickedItem;
+                selectedMaori.classList.add('selected');
+            } else {
+                if (selectedEnglish) selectedEnglish.classList.remove('selected');
+                selectedEnglish = clickedItem;
+                selectedEnglish.classList.add('selected');
+            }
+
+            if (selectedMaori && selectedEnglish) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            if (selectedMaori.dataset.pairKey === selectedEnglish.dataset.pairKey) {
+                const color = matchColors[matchedCount % matchColors.length];
+                
+                const pairDiv = document.createElement('div');
+                pairDiv.classList.add('matched-pair');
+                pairDiv.style.backgroundColor = color;
+                
+                selectedMaori.removeEventListener('click', handleItemClick);
+                selectedEnglish.removeEventListener('click', handleItemClick);
+
+                selectedMaori.classList.remove('item', 'selected');
+                selectedEnglish.classList.remove('item', 'selected');
+                selectedMaori.classList.add('matched-item');
+                selectedEnglish.classList.add('matched-item');
+
+                pairDiv.appendChild(selectedMaori);
+                pairDiv.appendChild(selectedEnglish);
+                matchedPairsContainer.appendChild(pairDiv);
+
+                feedback.textContent = "Ka pai! Correct!";
+                matchedCount++;
+                
+                if (matchedCount === phrases.length) {
+                    feedback.textContent = "Ka rawe! You've matched them all!";
+                }
+
+            } else {
+                feedback.textContent = "Try again!";
+                if (selectedMaori) selectedMaori.classList.remove('selected');
+                if (selectedEnglish) selectedEnglish.classList.remove('selected');
+            }
+            selectedMaori = null;
+            selectedEnglish = null;
+        }
+
+        resetButton.addEventListener('click', init);
+
+        init();
+    </script>
+
+</body>
+</html>
