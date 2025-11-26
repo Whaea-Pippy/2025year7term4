@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="mi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ngā Uara Māori — Māori Values</title>
+  <style>
+    body{font-family:Poppins,Nunito,sans-serif;background:#f6f8fb;margin:0;padding:24px;color:#0f172a; background-image: url('.idx/images/tikanga3.jpg');}
+    .container{max-width:900px;margin:0 auto}
+    .question{background:#fff;border-radius:14px;padding:16px;margin-bottom:24px;box-shadow:0 6px 18px rgba(15,23,42,.06)}
+    .tiles-grid{display:flex;flex-wrap:wrap;gap:10px}
+    .tile{padding:12px 16px;border-radius:10px;font-weight:600;cursor:pointer;user-select:none;box-shadow:0 4px 12px rgba(0,0,0,.06)}
+    .tile[data-used="true"]{opacity:.45;cursor:default}
+    .chip-1{background:#ffecd1}.chip-2{background:#e6fbe6}.chip-3{background:#e8f0ff}.chip-4{background:#fef08a}.chip-5{background:#fbcfe8}
+    .answer{background:#fff;border-radius:12px;min-height:90px;padding:12px;display:flex;flex-wrap:wrap;gap:10px;box-shadow:0 6px 18px rgba(15,23,42,.04)}
+    button{padding:10px 14px;border:0;border-radius:10px;font-weight:700;color:#fff;background:#0ea5a4;cursor:pointer;margin-right:8px}
+    button.secondary{background:#64748b}
+    .feedback{margin-top:10px;font-weight:700}
+    .correct{color:green}.incorrect{color:#b91c1c}
+    .flashcard-container { display: flex; flex-direction: column; gap: 16px; align-items: center; margin-top: 16px; }
+    .flashcard { width: 90%; perspective: 1000px; }
+    .flashcard-inner { position: relative; width: 100%; height: 160px; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 10px; }
+    .flashcard:hover .flashcard-inner { transform: rotateY(180deg); }
+    .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; flex-direction: column; font-size: 1.2em; border-radius: 10px; padding: 12px; box-sizing: border-box; }
+    .flashcard-front { background-color: rgba(230, 251, 230, 0.8); color: #000; font-weight: 700; }
+    .flashcard-back { background-color: rgba(255, 236, 209, 0.8); color: #000; transform: rotateY(180deg); }
+
+    .vocab-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 24px; }
+    .vocab-card { perspective: 1000px; }
+    .vocab-card-inner { position: relative; width: 100%; height: 100px; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); border-radius: 10px; }
+    .vocab-card:hover .vocab-card-inner { transform: rotateY(180deg); }
+    .vocab-card-front, .vocab-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; justify-content: center; align-items: center; font-size: 1em; border-radius: 10px; padding: 5px; box-sizing: border-box; }
+    .vocab-card-front { background-color: #e6fbe6; color: black; }
+    .vocab-card-back { background-color: #ffecd1; color: black; transform: rotateY(180deg); }
+
+    .value-heading { font-size:1.05em; margin:8px 0 6px; font-weight:800; }
+    .controls { text-align: right; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h1>Ngā Uara Māori — Māori Values</h1>
+      <div class="controls">
+        <button id="shuffle-flashcards">Shuffle cards</button>
+      </div>
+    </div>
+
+    <!-- Flashcards (values) -->
+    <div id="flashcards-container"></div>
+
+    <h2>Vocabulary</h2>
+    <p>Flip these cards to check the English meaning.</p>
+    <div class="vocab-grid" id="vocabulary-grid"></div>
+
+    <h2>Sentence Building</h2>
+    <p>Click the tiles in order to build the correct te reo phrase for each English prompt. Each activity has the main concept as a heading and as the first tile.</p>
+    <div id="activities"></div>
+  </div>
+
+<script>
+(function(){
+  const pageContent = {
+    flashcards: [
+      { mi: "Whanaungatanga — Ngā hononga, te whanaunga, me te noho tahi.", en: "Relationships, kinship, and a sense of belonging." },
+      { mi: "Manaakitanga — Te manaaki, te atawhai, me te tiaki i ētahi atu.", en: "Hospitality, kindness, and care for others." },
+      { mi: "Kaitiakitanga — Te kaitiaki i te taiao, te tangata, me ngā rawa.", en: "Guardianship of the environment, people, and resources." },
+      { mi: "Mana — Te ihi, te wehi, te tapu, te rangatiratanga, me te whakaute.", en: "Prestige, authority, personal integrity, and respect." },
+      { mi: "Tapu me te Noa — Te mārama ki te tapu me te noa, kia taurite ai te ao.", en: "Understanding sacredness (tapu) and ordinary life (noa), maintaining balance." },
+      { mi: "Utu — Te utu, te tōkeke, me te whakahoki i te taurite.", en: "Reciprocity, fairness, and restoring balance." },
+      { mi: "Rangatiratanga — Te rangatira, te kawenga, me te tino motuhake.", en: "Leadership, responsibility, and self-determination." },
+      { mi: "Wairuatanga — Te wairua me te hononga ki ngā tīpuna.", en: "Spirituality and connection to ancestors (tīpuna)." },
+      { mi: "Aroha — Te aroha, te atawhai, me te manaaki i ētahi atu.", en: "Compassion, empathy, and love for others." },
+      { mi: "Kotahitanga — Te kotahitanga me te mahi ngātahi a te katoa.", en: "Unity and collective action; working together." }
+    ],
+    vocabulary: [
+      { mi: "whanaungatanga", en: "relationships / kinship" },
+      { mi: "manaakitanga", en: "hospitality / kindness" },
+      { mi: "kaitiakitanga", en: "guardianship" },
+      { mi: "mana", en: "prestige / authority" },
+      { mi: "tapu", en: "sacred" },
+      { mi: "noa", en: "ordinary / common" },
+      { mi: "utu", en: "reciprocity / balance" },
+      { mi: "rangatiratanga", en: "leadership / self-determination" },
+      { mi: "wairuatanga", en: "spirituality" },
+      { mi: "aroha", en: "compassion / love" },
+      { mi: "kotahitanga", en: "unity" }
+    ],
+    sentences: [
+      {
+        title: "Whanaungatanga",
+        eng: "Relationships, kinship, and a sense of belonging.",
+        order: ["Whanaungatanga:","Ngā","hononga,","te","whanaunga,","me","te","noho","tahi."]
+      },
+      {
+        title: "Manaakitanga",
+        eng: "Hospitality, kindness, and care for others.",
+        order: ["Manaakitanga:","Te","manaaki,","te","atawhai,","me","te","tiaki","i","ētahi","atu."]
+      },
+      {
+        title: "Kaitiakitanga",
+        eng: "Guardianship of the environment, people, and resources.",
+        order: ["Kaitiakitanga:","Te","kaitiaki","i","te","taiao,","te","tangata,","me","ngā","rawa."]
+      },
+      {
+        title: "Mana",
+        eng: "Prestige, authority, personal integrity, and respect.",
+        order: ["Mana:","Te","ihi,","te","wehi,","te","tapu,","te","rangatiratanga,","me","te","whakaute."]
+      },
+      {
+        title: "Tapu me te Noa",
+        eng: "Understanding sacredness (tapu) and ordinary life (noa), maintaining balance.",
+        order: ["Tapu me te Noa:","Te","mārama","ki","te","tapu","me","te","noa,","kia","taurite","ai","te","ao."]
+      },
+      {
+        title: "Utu",
+        eng: "Reciprocity, fairness, and restoring balance.",
+        order: ["Utu:","Te","utu,","te","tōkeke,","me","te","whakahoki","i","te","taurite."]
+      },
+      {
+        title: "Rangatiratanga",
+        eng: "Leadership, responsibility, and self-determination.",
+        order: ["Rangatiratanga:","Te","rangatira,","te","kawenga,","me","te","tino","motuhake."]
+      },
+      {
+        title: "Wairuatanga",
+        eng: "Spirituality and connection to ancestors (tīpuna).",
+        order: ["Wairuatanga:","Te","wairua","me","te","hononga","ki","ngā","tīpuna."]
+      },
+      {
+        title: "Aroha",
+        eng: "Compassion, empathy, and love for others.",
+        order: ["Aroha:","Te","aroha,","te","atawhai,","me","te","manaaki","i","ētahi","atu."]
+      },
+      {
+        title: "Kotahitanga",
+        eng: "Unity and collective action; working together.",
+        order: ["Kotahitanga:","Te","kotahitanga","me","te","mahi","ngātahi","a","te","katoa."]
+      }
+    ]
+  };
+
+  /* utility shuffle (Fisher–Yates) */
+  function shuffle(arr){
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function createFlashcard(item) {
+    return `
+      <div class="flashcard">
+        <div class="flashcard-inner">
+          <div class="flashcard-front"><p>${item.mi}</p></div>
+          <div class="flashcard-back"><p>${item.en}</p></div>
+        </div>
+      </div>`;
+  }
+
+  function createVocabCard(item) {
+    return `
+      <div class="vocab-card">
+        <div class="vocab-card-inner">
+          <div class="vocab-card-front"><p><strong>${item.mi}</strong></p></div>
+          <div class="vocab-card-back"><p>${item.en}</p></div>
+        </div>
+      </div>`;
+  }
+
+  const flashcardsContainer = document.getElementById('flashcards-container');
+  const vocabGrid = document.getElementById('vocabulary-grid');
+  const activitiesContainer = document.getElementById('activities');
+  const shuffleBtn = document.getElementById('shuffle-flashcards');
+
+  let currentFlashcards = pageContent.flashcards.slice();
+
+  function renderFlashcards(arr){
+    if(!flashcardsContainer) return;
+    flashcardsContainer.className = 'flashcard-container';
+    flashcardsContainer.innerHTML = arr.map(createFlashcard).join('');
+  }
+
+  function renderVocab(){
+    if(!vocabGrid) return;
+    vocabGrid.innerHTML = pageContent.vocabulary.map(createVocabCard).join('');
+  }
+
+  /* Build sentence activities — includes a heading for the main concept (title),
+     and ensures the title is the first tile (so it's not ignored). Tiles tracked by unique id. */
+  function buildActivity(item, idx){
+    if(!activitiesContainer) return;
+    const div = document.createElement('div');
+    div.className = 'question';
+    div.innerHTML = `<div class="value-heading">${item.title}</div>
+      <h3 style="margin:6px 0 10px;">${idx + 1}. ${item.eng}</h3>
+      <div class='tiles-grid' id='tiles${idx}'></div>
+      <div class='answer' id='ans${idx}'><div class='answer-placeholder'>Click tiles above to build your sentence.</div></div>
+      <button id='check${idx}'>Check</button>
+      <button class='secondary' id='reset${idx}'>Reset</button>
+      <div class='feedback' id='feed${idx}'></div>`;
+    activitiesContainer.appendChild(div);
+
+    const tilesGrid = document.getElementById(`tiles${idx}`);
+    const answer = document.getElementById(`ans${idx}`);
+    const feedback = document.getElementById(`feed${idx}`);
+
+    let answerArr = [];
+    // create unique ids per tile using activity idx and tile index
+    let tiles = item.order.map((t, i) => ({ id: `${idx}-${i}`, text: t, used: false, styleClass: 'chip-' + ((i % 5) + 1) }));
+
+    function renderTiles(){
+      tilesGrid.innerHTML = '';
+      shuffle([...tiles]).forEach(t => {
+        const el = document.createElement('div');
+        el.className = 'tile ' + t.styleClass;
+        el.textContent = t.text;
+        el.dataset.id = t.id;
+        el.dataset.used = t.used;
+        if(t.used) el.dataset.used = "true";
+        el.addEventListener('click', () => selectTile(t, el));
+        tilesGrid.appendChild(el);
+      });
+    }
+
+    function selectTile(tileObj, el){
+      if (tileObj.used) return;
+      tileObj.used = true;
+      el.dataset.used = "true";
+      // add the tile object to the answer array (store id+text so removal is unambiguous)
+      answerArr.push({ id: tileObj.id, text: tileObj.text, styleClass: tileObj.styleClass });
+
+      // create chip with dataset id so we can remove the correct instance
+      const chip = document.createElement('div');
+      chip.className = 'tile ' + tileObj.styleClass;
+      chip.textContent = tileObj.text;
+      chip.dataset.id = tileObj.id;
+      chip.addEventListener('click', () => {
+        const tileId = chip.dataset.id;
+        // find index in answerArr, remove that instance
+        const idxInAns = answerArr.findIndex(a => a.id === tileId);
+        if (idxInAns > -1) answerArr.splice(idxInAns, 1);
+        // mark original tile as unused
+        const orig = tiles.find(t => t.id === tileId);
+        if (orig) orig.used = false;
+        chip.remove();
+        updatePlaceholder();
+        renderTiles();
+      });
+
+      // remove placeholder if present
+      const ph = answer.querySelector('.answer-placeholder');
+      if (ph) ph.remove();
+      answer.appendChild(chip);
+    }
+
+    function updatePlaceholder(){
+      if (answerArr.length === 0) {
+        answer.innerHTML = '';
+        const ph = document.createElement('div');
+        ph.className = 'answer-placeholder';
+        ph.textContent = 'Click tiles above to build your sentence.';
+        answer.appendChild(ph);
+      }
+    }
+
+    document.getElementById(`check${idx}`).addEventListener('click', () => {
+      const user = answerArr.map(a => a.text).join(' ').replace(/\s+/g, ' ').trim();
+      const correct = item.order.join(' ').replace(/\s+/g, ' ').trim();
+      const isCorrect = (user === correct);
+      feedback.textContent = isCorrect ? '🎉 Tino pai! — Correct.' : '✖ Aroha mai — try again.';
+      feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'incorrect');
+    });
+
+    document.getElementById(`reset${idx}`).addEventListener('click', () => {
+      answerArr = [];
+      tiles.forEach(t => t.used = false);
+      answer.innerHTML = '<div class="answer-placeholder">Click tiles above to build your sentence.</div>';
+      feedback.textContent = '';
+      renderTiles();
+    });
+
+    renderTiles();
+  }
+
+  // initial render
+  renderFlashcards(currentFlashcards);
+  renderVocab();
+  pageContent.sentences.forEach(buildActivity);
+
+  // shuffle button for flashcards
+  if (shuffleBtn) {
+    shuffleBtn.addEventListener('click', () => {
+      currentFlashcards = shuffle(currentFlashcards.slice());
+      renderFlashcards(currentFlashcards);
+    });
+  }
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+/** tailwind.css – FINAL VERSION for Rapu Kupu EASY – 25 Nov 2025 **/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Your custom root variable */
+@layer base {
+  :root { --tile-bg: rgba(255,255,255,0.2); }
+}
+
+/* All the arbitrary colours used in your game */
+@layer utilities {
+  .bg-\[\#111827\] { background-color: #111827; }
+  .bg-\[\#16a34a\] { background-color: #16a34a; }
+  .bg-\[\#1e3a8a\] { background-color: #1e3a8a; }
+  .bg-\[\#1e40af\] { background-color: #1e40af; }
+  .bg-\[\#2563eb\] { background-color: #2563eb; }
+  .bg-\[\#3b82f6\] { background-color: #3b82f6; }
+  .bg-\[\#4b5563\] { background-color: #4b5563; }
+  .bg-\[\#60a5fa\] { background-color: #60a5fa; }
+  .bg-\[\#6b21a8\] { background-color: #6b21a8; }
+  .bg-\[\#6b7280\] { background-color: #6b7280; }
+  .bg-\[\#7e22ce\] { background-color: #7e22ce; }
+  .bg-\[\#8b4513\] { background-color: #8b4513; }
+  .bg-\[\#92400e\] { background-color: #92400e; }
+  .bg-\[\#9333ea\] { background-color: #9333ea; }
+  .bg-\[\#93c5fd\] { background-color: #93c5fd; }
+  .bg-\[\#a855f7\] { background-color: #a855f7; }
+  .bg-\[\#a78bfa\] { background-color: #a78bfa; }
+  .bg-\[\#be185d\] { background-color: #be185d; }
+  .bg-\[\#c084fc\] { background-color: #c084fc; }
+  .bg-\[\#c2410c\] { background-color: #c2410c; }
+  .bg-\[\#c4b5fd\] { background-color: #c4b5fd; }
+  .bg-\[\#ca8a04\] { background-color: #ca8a04; }
+  .bg-\[\#d1d5db\] { background-color: #d1d5db; }
+  .bg-\[\#d8b4fe\] { background-color: #d8b4fe; }
+  .bg-\[\#db2777\] { background-color: #db2777; }
+  .bg-\[\#ddd6fe\] { background-color: #ddd6fe; }
+  .bg-\[\#e5e7eb\] { background-color: #e5e7eb; }
+  .bg-\[\#EACBF9\] { background-color: #EACBF9; }
+  .bg-\[\#ea580c\] { background-color: #ea580c; }
+  .bg-\[\#eab308\] { background-color: #eab308; }
+  .bg-\[\#ec4899\] { background-color: #ec4899; }
+  .bg-\[\#e9d5ff\] { background-color: #e9d5ff; }
+  .bg-\[\#f97316\] { background-color: #f97316; }
+  .bg-\[\#f9a8d4\] { background-color: #f9a8d4; }
+  .bg-\[\#facc15\] { background-color: #facc15; }
+  .bg-\[\#fb923c\] { background-color: #fb923c; }
+  .bg-\[\#fce7f3\] { background-color: #fce7f3; }
+  .bg-\[\#fcd34d\] { background-color: #fcd34d; }
+  .bg-\[\#fdba74\] { background-color: #fdba74; }
+  .bg-\[\#fde68a\] { background-color: #fde68a; }
+  .bg-\[\#fed7aa\] { background-color: #fed7aa; }
+  .bg-\[\#fef08a\] { background-color: #fef08a; }
+  .bg-\[\#fef9c3\] { background-color: #fef9c3; }
+  .bg-\[\#ffedd5\] { background-color: #ffedd5; }
+  .text-black { color: #000; }
+  .text-white { color: #fff; }
+}

@@ -18,7 +18,10 @@
     *{box-sizing:border-box}
     body{
       margin:0;
-      background: linear-gradient(135deg,var(--bg), #fffaf0);
+      background-image: url('.idx/images/children.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
       color:var(--text);
       padding:32px;
       -webkit-font-smoothing:antialiased;
@@ -27,7 +30,7 @@
     .container{
       max-width:960px;
       margin:0 auto;
-      background:var(--card);
+      background: rgba(255, 255, 255, 0.5);
       border-radius:16px;
       padding:24px;
       box-shadow:0 8px 30px rgba(10,10,10,0.05);
@@ -44,7 +47,7 @@
     }
 
     .panel{
-      background:var(--muted);
+      background:transparent;
       padding:14px;
       border-radius:var(--radius);
       min-height:220px;
@@ -65,7 +68,7 @@
       border:2px solid transparent;
     }
     .item.selected{outline:3px solid rgba(0,0,0,0.06);transform:translateY(-2px)}
-    .item.matched{background: #e8f5e9; cursor:default;}
+    .item.matched{background: rgba(232, 245, 233,0.3); cursor:default;}
 
     .controls{
       display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:flex-start;
@@ -84,7 +87,6 @@
 <body>
   <div class="container">
     <h1>Match the sentences — Te Reo & English</h1>
-    <p class="lead">Two short matching activities. Tap one Māori sentence and then tap the English sentence you think matches. Each section has 5 sentences.</p>
 
     <!-- SECTION 1 -->
     <div class="section" id="section-1">
@@ -146,8 +148,6 @@
         <div class="status" id="status-2">Matches: 0 / 5</div>
       </div>
     </div>
-
-    <p class="small">Designed to be simple, pastel, and readable. Works on phones and desktops.</p>
   </div>
 
   <script>
@@ -165,6 +165,22 @@
         selectedM && selectedM.classList.remove('selected');
         selectedE && selectedE.classList.remove('selected');
         selectedM = null; selectedE = null;
+      }
+
+      function sortMatched(listEl) {
+        const parent = listEl;
+        const items = Array.from(parent.children);
+        const matchedItems = items.filter(it => it.classList.contains('matched'));
+        
+        // Sort matched items based on the number in the data-id
+        matchedItems.sort((a, b) => {
+            const idA = parseInt(a.getAttribute('data-id').substring(1));
+            const idB = parseInt(b.getAttribute('data-id').substring(1));
+            return idA - idB;
+        });
+
+        // Prepend sorted matched items in reverse to get the correct order at the top
+        matchedItems.reverse().forEach(item => parent.prepend(item));
       }
 
       moriItems.forEach(it => {
@@ -195,9 +211,9 @@
           selectedM.classList.add('matched');
           selectedE.classList.add('matched');
           
-          // Move to top of list
-          selectedM.parentElement.prepend(selectedM);
-          selectedE.parentElement.prepend(selectedE);
+          // Sort both lists to bring matched items to the top in order
+          sortMatched(moriListEl);
+          sortMatched(engListEl);
 
           selectedM.classList.remove('selected');
           selectedE.classList.remove('selected');

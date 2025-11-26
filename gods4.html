@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Māori Atua Flashcards</title>
+<style>
+  :root{
+    --bg:#fbfbfa; --card-bg:rgba(255,255,255,0.85); --accent:#0b6d6b; --muted:#444;
+    --shadow:0 10px 30px rgba(10,10,10,0.12);
+  }
+  *{box-sizing:border-box}
+  body{font-family:Poppins,Inter,system-ui; margin:0; background:linear-gradient(180deg,#f3fffef0,#f8fbff); color:#111; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden}
+
+  .stage{width:100vw; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative}
+
+  .controls{display:flex; gap:8px; margin-bottom:12px; z-index:3}
+  .btn{background:var(--accent); color:white; border:none; padding:12px 16px; border-radius:10px; font-weight:600; cursor:pointer; font-size:clamp(14px,1.5vw,18px)}
+  .btn.secondary{background:transparent;color:var(--accent); border:2px solid var(--accent)}
+
+  .card-wrap{width:80vw; height:80vh; max-width:1200px; max-height:1000px; perspective:1500px; position:relative; z-index:1}
+  .card{width:100%; height:100%; border-radius:18px; background:var(--card-bg); box-shadow:var(--shadow); position:relative; transform-style:preserve-3d; transition:transform 600ms cubic-bezier(.2,.9,.3,.95)}
+
+  .card.is-flipped{transform:rotateY(180deg)}
+
+  .face{position:absolute; inset:0; backface-visibility:hidden; padding:32px; display:flex; flex-direction:column; gap:16px; overflow-wrap:break-word}
+  .front{align-items:flex-start; justify-content:center}
+  .back{transform:rotateY(180deg); align-items:flex-start; justify-content:flex-start; display:flex; flex-direction:column; gap:16px}
+
+  h1.atua{font-size:clamp(36px,7vw,60px); margin:0; letter-spacing:0.6px}
+  .symbol{font-size:clamp(40px,8vw,72px); opacity:0.95}
+  .quote{font-style:italic; color:var(--muted); font-size:clamp(16px,2vw,22px)}
+
+  .meta{display:flex; gap:18px; flex-wrap:wrap; margin-top:8px}
+  .meta .pill{background:#f2f7f6;padding:10px 14px;border-radius:999px;font-weight:600;color:#123;font-size:clamp(14px,1.8vw,18px)}
+
+  /* Back layout using grid for alignment */
+  .back-header{display:flex; align-items:center; gap:16px}
+  .back-header .symbol{font-size:clamp(40px,6vw,72px)}
+  .back-header h1.atua{font-size:clamp(36px,6vw,60px); margin:0}
+
+  .back-grid{display:grid; grid-template-columns:140px 1fr; row-gap:12px; column-gap:12px; font-size:clamp(16px,1.8vw,20px); align-items:start;}
+  .back-grid strong{justify-self:end; font-weight:700; color:var(--accent)}
+
+  .bottom-bar{position:absolute; left:20px; bottom:20px; display:flex; gap:10px; align-items:center; z-index:3}
+  .nav-btn{background:transparent;border:2px solid rgba(0,0,0,0.06); padding:10px 14px;border-radius:8px; cursor:pointer; font-size:clamp(14px,1.8vw,18px)}
+
+  .menu-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:10}
+  .menu-overlay.open{display:flex}
+  .menu{width:90vw; max-width:900px; max-height:80vh; background:white; border-radius:14px; padding:24px; overflow:auto}
+  .menu h2{margin:0 0 16px; font-size:clamp(20px,3vw,28px)}
+  .card-list{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px}
+  .card-tile{display:flex; flex-direction:column; gap:6px; padding:14px; border-radius:10px; background:#fbfffe; cursor:pointer; border:1px solid rgba(0,0,0,0.06); font-size:clamp(14px,1.5vw,18px)}
+  .card-tile small{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="controls">
+    <button class="btn" id="flipBtn">Flip</button>
+    <button class="btn" id="randomBtn">Random</button>
+    <button class="btn secondary" id="openMenu">Menu</button>
+  </div>
+
+  <div class="card-wrap">
+    <div class="card" id="card">
+      <div class="face front">
+        <div style="display:flex;align-items:center;gap:24px;width:100%">
+          <div style="flex:1">
+            <div class="symbol" id="symbol">🌳</div>
+            <h1 class="atua" id="atuaName">Tāne Mahuta</h1>
+            <div class="quote" id="quote">Tipuna o te ngahere, kaitiaki o ngā manu.</div>
+            <div class="meta">
+              <div class="pill" id="domain">Forests & birds</div>
+              <div class="pill" id="relation">Son of Rangi & Papa</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="face back" id="backContent">
+        <div class="back-header">
+          <div class="symbol" id="symbolBack">🌳</div>
+          <h1 class="atua" id="atuaNameBack">Tāne Mahuta</h1>
+        </div>
+        <div class="back-grid">
+          <strong>Family:</strong> <span id="family">Son of Ranginui and Papatūānuku</span>
+          <strong>Domain:</strong> <span id="domainBack">Forests, birds, and trees</span>
+          <strong>Relationships:</strong> <span id="relationships">Created Hineahuone, brother to Tangaroa, Tūmatauenga, Tāwhirimātea</span>
+          <strong>Story:</strong> <span id="story">Separated his parents to let light into the world</span>
+          <strong>Values:</strong> <span id="values">Growth, guardianship of life</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="nav-btn" id="prevBtn">◀ Prev</button>
+      <div style="font-weight:700" id="position">1 / 12</div>
+      <button class="nav-btn" id="nextBtn">Next ▶</button>
+    </div>
+  </div>
+
+  <div class="menu-overlay" id="menuOverlay">
+    <div class="menu">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h2>All Atua</h2>
+        <button class="btn secondary" id="closeMenu">Close</button>
+      </div>
+      <div class="card-list" id="cardList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CARDS = [
+  {name:'Ranginui',symbol:'☁️',quote:'Sky father',family:'Partner: Papatūānuku',domain:'Sky',relationships:'Father of Tāne, Tangaroa, Tūmatauenga, Tāwhirimātea, Rongo, Haumia-tiketike',story:'Embraced Papatūānuku until their children separated them',values:'Origins, vastness'},
+  {name:'Papatūānuku',symbol:'🌏',quote:'Earth mother',family:'Partner: Ranginui',domain:'Earth',relationships:'Mother of Tāne, Tangaroa, Tūmatauenga, Tāwhirimātea, Rongo, Haumia-tiketike',story:'Nurtures all life',values:'Nurture, grounding'},
+  {name:'Tāne Mahuta',symbol:'🌳',quote:'Forests and birds',family:'Son of Ranginui and Papatūānuku',domain:'Forests & birds',relationships:'Created Hineahuone, brother to Tangaroa, Tūmatauenga, Tāwhirimātea',story:'Separated his parents to let light into the world',values:'Growth, guardianship of life'},
+  {name:'Tangaroa',symbol:'🌊',quote:'God of the sea',family:'Son of Ranginui and Papatūānuku',domain:'Sea & creatures',relationships:'Brother to Tāne, enemy to Tāwhirimātea',story:'Ruler of the oceans',values:'Respect for the sea'},
+  {name:'Tāwhirimātea',symbol:'🌬️',quote:'God of storms',family:'Son of Ranginui and Papatūānuku',domain:'Weather & winds',relationships:'Angry at siblings for separating parents',story:'Breathes storms across the world',values:'Power of nature'},
+  {name:'Tūmatauenga',symbol:'⚔️',quote:'War and humans',family:'Son of Ranginui and Papatūānuku',domain:'War & humans',relationships:'Clashes with brothers for human benefit',story:'Stands as the atua of humanity and conflict',values:'Courage, action'},
+  {name:'Rongo',symbol:'🌾',quote:'Peace and cultivated food',family:'Son of Ranginui and Papatūānuku',domain:'Agriculture, peace',relationships:'Brother to Haumia-tiketike',story:'Promotes cultivation and peace among people',values:'Peace, wellbeing'},
+  {name:'Haumia-tiketike',symbol:'🥔',quote:'Wild foods',family:'Son of Ranginui and Papatūānuku',domain:'Uncultivated plants',relationships:'Brother to Rongo',story:'Keeper of wild foods',values:'Resilience, resourcefulness'},
+  {name:'Hineahuone',symbol:'🪨',quote:'First woman',family:'Created by Tāne Mahuta',domain:'Beginnings',relationships:'Ancestor of Hine-tītama',story:'Formed from earth by Tāne',values:'Human origins'},
+  {name:'Hine-nui-te-pō',symbol:'🌙',quote:'Goddess of night and death',family:'Daughter of Tāne Mahuta',domain:'Death & afterlife',relationships:'Guardian of the underworld',story:'Receives souls of the dead',values:'Transition, endings'},
+  {name:'Māui',symbol:'🪝',quote:'Demigod, trickster',family:'Ancestor figure',domain:'Change & ingenuity',relationships:'Trickster hero with many exploits',story:'Fished up islands and slowed the sun',values:'Ingenuity, cleverness'},
+  {name:'Whiro',symbol:'🖤',quote:'Darkness',family:'Opposing force to light',domain:'Illness & misfortune',relationships:'Opposes light and goodness',story:'Represents challenge and danger',values:'Caution, awareness'}
+];
+
+const cardEl=document.getElementById('card');
+const flipBtn=document.getElementById('flipBtn');
+const randomBtn=document.getElementById('randomBtn');
+const prevBtn=document.getElementById('prevBtn');
+const nextBtn=document.getElementById('nextBtn');
+const position=document.getElementById('position');
+const openMenuBtn=document.getElementById('openMenu');
+const menuOverlay=document.getElementById('menuOverlay');
+const closeMenuBtn=document.getElementById('closeMenu');
+const cardList=document.getElementById('cardList');
+
+const symbolBack=document.getElementById('symbolBack');
+const atuaNameBack=document.getElementById('atuaNameBack');
+
+let index=0;
+
+function renderCard(i){
+  const d=CARDS[i];
+  document.getElementById('symbol').textContent=d.symbol;
+  document.getElementById('atuaName').textContent=d.name;
+  document.getElementById('quote').textContent=d.quote;
+  document.getElementById('domain').textContent=d.domain;
+  document.getElementById('relation').textContent=d.family;
+  document.getElementById('family').textContent=d.family;
+  document.getElementById('domainBack').textContent=d.domain;
+  document.getElementById('relationships').textContent=d.relationships;
+  document.getElementById('story').textContent=d.story;
+  document.getElementById('values').textContent=d.values;
+
+  symbolBack.textContent=d.symbol;
+  atuaNameBack.textContent=d.name;
+
+  position.textContent=(i+1)+' / '+CARDS.length;
+  cardEl.classList.remove('is-flipped');
+}
+
+function buildMenu(){
+  cardList.innerHTML='';
+  CARDS.forEach((c,i)=>{
+    const tile=document.createElement('button');
+    tile.className='card-tile';
+    tile.innerHTML=`<strong>${c.symbol} ${c.name}</strong><small>${c.domain}</small>`;
+    tile.addEventListener('click',()=>{index=i; renderCard(index); closeMenuOverlay();});
+    cardList.appendChild(tile);
+  });
+}
+
+function next(){index=(index+1)%CARDS.length; renderCard(index);}
+function prev(){index=(index-1+CARDS.length)%CARDS.length; renderCard(index);}
+function randomize(){index=Math.floor(Math.random()*CARDS.length); renderCard(index);}
+function toggleFlip(){cardEl.classList.toggle('is-flipped');}
+function openMenuOverlay(){menuOverlay.classList.add('open');}
+function closeMenuOverlay(){menuOverlay.classList.remove('open');}
+
+flipBtn.addEventListener('click',toggleFlip);
+randomBtn.addEventListener('click',randomize);
+prevBtn.addEventListener('click',prev);
+nextBtn.addEventListener('click',next);
+openMenuBtn.addEventListener('click',openMenuOverlay);
+closeMenuBtn.addEventListener('click',closeMenuOverlay);
+menuOverlay.addEventListener('click',e=>{if(e.target===menuOverlay) closeMenuOverlay();});
+cardEl.addEventListener('click',e=>{if(!e.target.closest('.btn')) toggleFlip();});
+
+document.addEventListener('keydown',e=>{
+  if(menuOverlay.classList.contains('open')){if(e.key==='Escape') closeMenuOverlay(); return;}
+  if(e.key==='ArrowRight') next();
+  if(e.key==='ArrowLeft') prev();
+  if(e.key===' ') toggleFlip();
+  if(e.key==='m') openMenuOverlay();
+});
+
+buildMenu();
+renderCard(index);
+</script>
+</body>
+</html>

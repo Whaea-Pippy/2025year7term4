@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "term4year7"
-  }
+  },
+  "targets": {
+    "term4year7": {
+      "hosting": {
+        "rapukupu": [
+          "rapukupu"
+        ],
+        "term4year7": [
+          "term4year7"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

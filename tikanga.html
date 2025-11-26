@@ -6,9 +6,13 @@
     <title>Core Tikanga Values</title>
     <style>
         body {
-            background-color: white;
+            background-image: url('.idx/images/tikanga.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: black;
             display: flex;
+            flex-direction: column; /* Allow content to stack vertically */
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -20,6 +24,9 @@
         .content {
             text-align: center;
             max-width: 900px;
+            background-color: rgba(255, 255, 255, 0.6);
+            padding: 20px;
+            border-radius: 15px;
         }
         h1 {
             font-size: clamp(2rem, 5vw, 3.5rem);
@@ -31,9 +38,58 @@
             margin: 0.5em 0;
             line-height: 1.6;
         }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 900px; /* Match content width */
+        }
+        .button-grid a {
+            background-color: rgba(0, 86, 179, 0.9);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-decoration: none;
+            text-align: center;
+        }
+        .full-width-link {
+          display: block;
+          width: 100%;
+          max-width: 900px;
+          background-color: rgba(0, 86, 179, 0.9);
+          color: white;
+          padding: 15px;
+          text-decoration: none;
+          border-radius: 15px;
+          text-align: center;
+          margin-top: 20px;
+          font-size: 1rem;
+        }
+        @media (max-width: 768px) {
+            .button-grid {
+                display: flex;
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="button-grid">
+        <a href="lead4.html">LEAD</a>
+        <a href="hehonorei.html">He Hōnore</a>
+        <a href="kiatau.html">Kia Tau</a>
+        <a href="pepeha1.html">Pepeha</a>
+        <a href="whakatakatehau.html">Whakataka te hau</a>
+        <a href="mihi1.html">Mihi #1</a>
+        <a href="mihi2.html">Mihi #2</a>
+        <a href="mihi3.html">Mihi #3</a>
+        <a href="https://kumikupu.web.app/fieldcentre1.html">Mihi #4</a>
+    </div>
     <div class="content">
         <h1>Core Tikanga Values</h1>
         <p><strong>Whanaungatanga</strong> – Relationships, kinship, and a sense of belonging.</p>
@@ -47,5 +103,9 @@
         <p><strong>Aroha</strong> – Compassion, empathy, and love for others.</p>
         <p><strong>Kotahitanga</strong> – Unity and collective action; working together.</p>
     </div>
+    <a href="https://term4year7.web.app/tikanga5.html" class="full-width-link">Tikanga Flash, Match & Sentences</a>
+    <a href="https://term4year7.web.app/tikanga6.html" class="full-width-link">Tikanga Big Flash</a>
+    <a href="https://term4year7.web.app/mihi3vocab.html" class="full-width-link">Mihi Vocabulary</a>
+    <a href="https://term4year7.web.app/index_tikanga.html" class="full-width-link">Go to Tikanga Index</a>
 </body>
 </html>

@@ -23,6 +23,10 @@
             align-items: center;
             justify-content: flex-start; /* Align content to the top */
             min-height: 100vh;
+            background-image: url('.idx/images/tikanga6.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             background-color: #f0f0f0;
             padding-top: 20px; /* Add some padding at the top */
         }
@@ -58,32 +62,109 @@
             font-size: 1.3em;
             text-decoration: none;
             color: #fff;
-            background-color: #72a1eb;
+            background-color: rgba(120, 163, 109, 0.8);
             border-radius: 10px;
             transition: background-color 0.3s, transform 0.2s;
         }
         .game-button:hover {
-            background-color: #2563eb;
+            background-color: rgba(89, 126, 109, 0.9);
             transform: translateY(-3px); /* Add a slight lift on hover */
         }
         /* Style for buttons in the links section */
         .links-section .game-button {
-            background-color: #a9a9a9; /* A medium grey */
+            background-color: rgba(169, 169, 169, 0.8); /* A medium grey */
         }
         .links-section .game-button:hover {
-            background-color: #808080; /* A darker grey on hover */
+            background-color: rgba(128, 128, 128, 0.9); /* A darker grey on hover */
         }
         .green-row .game-button {
-            background-color: #28a745; /* green */
+            background-color: rgba(40, 167, 69, 0.8); /* green */
         }
         .pink-row .game-button {
-            background-color: #ff69b4; /* pink */
+            background-color: rgba(255, 105, 180, 0.8); /* pink */
+        }
+
+        /* About button styles */
+        .about-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #9c964f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .full-width-button {
+            flex-basis: 100%;
+            max-width: none;
         }
     </style>
 </head>
 <body>
+    <button id="about-button" class="about-button">About</button>
+
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>About This Website and the Code</h2>
+            <p>Many Tools have been used to create these sites:</p>
+            <p>Firebase Studio, Firebase Console, Github, ChatGPT, Grok, & Gemini</p>
+            <p>You can find code here: <a href="https://github.com/Whaea-Pippy">https://github.com/Whaea-Pippy</a></p>
+          <h3>My AI Coding Journey</h3>
+            <p>June 29, 2025 – Started experimenting with AI for images and content</p>
+            <p>August 2025 – Began coding with AI and embedding into Google Sites</p>
+            <p>I used apps.script (code.gs) in Google sheets, but found it was blocked by the school and not robust</p>
+            <p>September 10, 2025 – Joined Firebase to host and manage my apps</p>
+            <p>September 17, 2025 - Understanding how I could structure the web.app environment</p>
+            <p>I can see this will not replace my Google Sites, it simply adds a whole new dimension!</p>
+            <p>September 18, 2025 - Understanding how to use the backend to generalise</p>
+            <p>October 21, 2025 - Creating what my students need, when they need it.</p>
+            <p>This will always be a work in progress! Current focus: Free Tools Only</p>
+            <h3>All these links have been created since June 2025.</h3>
+        </div>
+    </div>
+
     <div class="menu-container">
-        <h1>Catalogue</h1>
+        <h1>Catalogue October 2025</h1>
 
         <h2>GOOGLE SITES</h2>
         <div class="button-row">
@@ -95,7 +176,7 @@
             <a href="https://sites.google.com/view/mtgb2/home" class="game-button">MTG B2</a>
         </div>
 
-        <h2>WEB APPS</h2>
+        <h2>WEB APPS - Firebase</h2>
         <div class="button-row">
             <a href="https://term4year7.web.app/" class="game-button">Year 7 Term 4 2025</a>
             <a href="https://kumikupu.web.app/" class="game-button">Games: Researching ideas</a>
@@ -103,6 +184,9 @@
             <a href="https://kumikupu.web.app/index_conversation.html" class="game-button">Conversation</a>
             <a href="https://btgb1-cfb98.web.app/" class="game-button">MTG B1</a>
             <a href="https://year10mtg2025-45864742-b68c5.web.app/" class="game-button">MTG B2</a>
+        </div>
+        <div class="button-row">
+            <a href="https://whaeajaz.web.app/" class="game-button full-width-button">History Of Te Reo Māori</a>
         </div>
 
         <h2>Important Links for Everyone</h2>
@@ -115,5 +199,33 @@
             <a href="https://kumikupu.web.app/holiday.html" class="game-button">Holidays</a>
         </div>
     </div>
+
+    <script>
+        // Get the modal
+        var modal = document.getElementById("about-modal");
+
+        // Get the button that opens the modal
+        var btn = document.getElementById("about-button");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close-button")[0];
+
+        // When the user clicks the button, open the modal 
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>

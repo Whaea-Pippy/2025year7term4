@@ -5,23 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Matching Game - Feelings</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             font-family: sans-serif;
+            background-image: url('.idx/images/rainbow.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f0f0f0;
+            padding: 20px;
         }
         .game-container {
-            width: 800px;
+            width: 850px;
             padding: 20px;
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.3);
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
         h1 {
             text-align: center;
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 10px;
+            border-radius: 15px;
+            color: #0056b3;
+        }
+        #matched-pairs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            min-height: 100px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+        .matched-pair {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
         }
         .matching-area {
             display: flex;
@@ -32,38 +59,60 @@
             width: 48%;
             display: flex;
             flex-direction: column;
+            gap: 10px;
         }
         .item {
-            padding: 15px;
-            margin: 5px;
-            border: 2px solid #ccc;
-            border-radius: 5px;
+            padding: 10px;
+            border: 2px solid #333; /* Darker border for visibility */
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background-color: transparent; /* Transparent background */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            color: #000; /* Ensure text is readable */
+            font-weight: bold;
+        }
+        .item:hover {
+            transform: translateY(-2px);
+            border-color: #7cb342;
         }
         .item.selected {
             background-color: #aed581;
             border-color: #7cb342;
         }
-        .item.correct {
-            background-color: #81c784;
-            border-color: #4caf50;
+        .matched-pair .item {
+            width: 48%;
+            margin: 0;
             cursor: default;
+        }
+        .matched-pair .item:hover {
+            transform: none;
         }
         .item.incorrect {
             background-color: #e57373;
             border-color: #f44336;
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% {transform: translateX(0);}
+            25% {transform: translateX(-5px);}
+            75% {transform: translateX(5px);}
         }
     </style>
 </head>
 <body>
     <div class="game-container">
         <h1>Kei te pēhea koe? - How are you?</h1>
+        <div id="matched-pairs-container"></div>
         <div class="matching-area">
             <div class="column" id="maori-column"></div>
             <div class="column" id="english-column"></div>
         </div>
-        <p id="feedback" style="text-align:center; font-size: 1.2em; margin-top: 20px;"></p>
+        <p id="feedback" style="text-align:center; font-size: 1.2em; margin-top: 20px; font-weight: bold; color: #0056b3;"></p>
     </div>
 
     <script>
@@ -83,23 +132,27 @@
         const maoriColumn = document.getElementById('maori-column');
         const englishColumn = document.getElementById('english-column');
         const feedback = document.getElementById('feedback');
+        const matchedPairsContainer = document.getElementById('matched-pairs-container');
+
+        const rainbowPastels = ['#ffadad', '#ffd6a5', '#fdffb6', '#caffbf', '#9bf6ff', '#a0c4ff', '#bdb2ff', '#ffc6ff', '#ffb3de', '#c9ffcf'];
+        let colorIndex = 0;
 
         let maoriPhrases = Object.keys(pairs);
         let englishPhrases = Object.values(pairs);
 
-        // Shuffle arrays to randomize order
         shuffleArray(maoriPhrases);
         shuffleArray(englishPhrases);
 
         maoriPhrases.forEach(phrase => {
-            const item = createItem(phrase, 'maori');
-            maoriColumn.appendChild(item);
+            maoriColumn.appendChild(createItem(phrase, 'maori'));
         });
 
         englishPhrases.forEach(phrase => {
-            const item = createItem(phrase, 'english');
-            englishColumn.appendChild(item);
+            englishColumn.appendChild(createItem(phrase, 'english'));
         });
+
+        window.addEventListener('load', adjustCardHeights);
+        window.addEventListener('resize', adjustCardHeights);
 
         function createItem(text, type) {
             const item = document.createElement('div');
@@ -117,20 +170,14 @@
 
         function handleItemClick(event) {
             const clickedItem = event.target;
-            if (clickedItem.classList.contains('correct')) {
-                return; // Already matched
-            }
+            if (clickedItem.classList.contains('matched') || clickedItem.closest('.matched-pair')) return;
 
             if (clickedItem.dataset.type === 'maori') {
-                if (selectedMaori) {
-                    selectedMaori.classList.remove('selected');
-                }
+                if (selectedMaori) selectedMaori.classList.remove('selected');
                 selectedMaori = clickedItem;
                 selectedMaori.classList.add('selected');
             } else if (clickedItem.dataset.type === 'english') {
-                if (selectedEnglish) {
-                    selectedEnglish.classList.remove('selected');
-                }
+                if (selectedEnglish) selectedEnglish.classList.remove('selected');
                 selectedEnglish = clickedItem;
                 selectedEnglish.classList.add('selected');
             }
@@ -145,37 +192,71 @@
             const englishText = selectedEnglish.dataset.value;
 
             if (pairs[maoriText] === englishText) {
-                // Correct match
-                selectedMaori.classList.add('correct');
-                selectedEnglish.classList.add('correct');
-                selectedMaori.classList.remove('selected');
-                selectedEnglish.classList.remove('selected');
+                feedback.textContent = "Ka pai! Correct!";
 
-                selectedMaori.removeEventListener('click', handleItemClick);
-                selectedEnglish.removeEventListener('click', handleItemClick);
+                const maoriCard = selectedMaori;
+                const englishCard = selectedEnglish;
+
+                maoriCard.classList.add('matched');
+                englishCard.classList.add('matched');
+                maoriCard.classList.remove('selected');
+                englishCard.classList.remove('selected');
+
+                const pairWrapper = document.createElement('div');
+                pairWrapper.classList.add('matched-pair');
+
+                const pairColor = rainbowPastels[colorIndex];
+                maoriCard.style.backgroundColor = pairColor;
+                englishCard.style.backgroundColor = pairColor;
+                maoriCard.style.borderColor = pairColor;
+                englishCard.style.borderColor = pairColor;
+                colorIndex = (colorIndex + 1) % rainbowPastels.length;
+
+                pairWrapper.appendChild(maoriCard);
+                pairWrapper.appendChild(englishCard);
+                matchedPairsContainer.appendChild(pairWrapper);
+
+                adjustCardHeights();
 
                 selectedMaori = null;
                 selectedEnglish = null;
                 correctMatches++;
-                feedback.textContent = "Ka pai! Correct!";
                 
                 if (correctMatches === maoriPhrases.length) {
-                    feedback.textContent = "Ngā mihi! You\'ve matched them all!";
+                    feedback.textContent = "Ngā mihi! You've matched them all!";
                 }
 
             } else {
-                // Incorrect match
+                feedback.textContent = "Try again.";
                 selectedMaori.classList.add('incorrect');
                 selectedEnglish.classList.add('incorrect');
-                feedback.textContent = "Try again.";
 
                 setTimeout(() => {
-                    selectedMaori.classList.remove('incorrect', 'selected');
-                    selectedEnglish.classList.remove('incorrect', 'selected');
+                    if (selectedMaori) selectedMaori.classList.remove('incorrect', 'selected');
+                    if (selectedEnglish) selectedEnglish.classList.remove('incorrect', 'selected');
                     selectedMaori = null;
                     selectedEnglish = null;
-                }, 1000);
+                    feedback.textContent = "";
+                }, 800);
             }
+        }
+
+        function adjustCardHeights() {
+            const items = document.querySelectorAll('.item');
+            if (items.length === 0) return;
+
+            items.forEach(item => item.style.height = 'auto');
+
+            maoriColumn.getBoundingClientRect();
+
+            let maxHeight = 0;
+            items.forEach(item => {
+                if (item.offsetHeight > maxHeight) {
+                    maxHeight = item.offsetHeight;
+                }
+            });
+
+            items.forEach(item => item.style.height = `${maxHeight}px`);
         }
 
         function shuffleArray(array) {

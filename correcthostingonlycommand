@@ -1,0 +1,2 @@
+firebase deploy --only hosting:term4year7
+firebase deploy --only hosting:rapukupu
